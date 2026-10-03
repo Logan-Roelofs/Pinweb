@@ -173,6 +173,29 @@ src/
   index.css                    Tailwind + Matrix theme colors/fonts
 ```
 
+## Quick Capture (admin, on your phone)
+
+Tap **⚡ Quick Capture** on the admin home screen (or **⚡ Capture** next to any draft):
+
+1. Pick the game (most recently edited first), or type a new name and tap **+ Add new game**. You can also start typing or taking photos *before* picking the game.
+2. **📷 Camera** opens the phone camera; **🖼 Gallery** picks existing photos.
+3. Type in the **Note** box. There's no save button: it saves as you type.
+
+Each capture visit becomes its own timestamped note on that game. In the game's full editor, the **Capture notes** panel shows them; **↓ Add to strategy** copies a note into the strategy text (marked "✓ added"), and **Continue** reopens a note to add more. "Pick up where you left off" on the admin home lists your drafts, most recently touched first.
+
+### What survives closing the app (or losing signal)
+
+| Situation | Survives? |
+|---|---|
+| Note text you typed | **Yes.** Copied to the phone instantly on every keystroke, and saved to Firestore's offline queue within a second. Synced when you're next online with the app open. |
+| A game you quick-added offline | **Yes.** Created on the phone and synced later. |
+| A photo, once the camera/gallery has handed it to the app | **Yes.** The original is saved on the phone *first*, then compressed (max 2000px, under about 1 MB). The **⇪ N** badge in the header counts photos still waiting. |
+| A photo whose upload was interrupted | **Yes, but it restarts from 0%** next time the app is open. Firebase can't resume a half-finished upload after the app closes. |
+| Uploading while the app is closed | **No.** Phones don't let websites upload in the background. Open the app with signal and the queue continues by itself (also on reconnect, and every 30 seconds). |
+| Closing the app while the camera is still open | **No.** The photo never reached the app. |
+| Signing out with photos waiting | They stay on the phone but can't upload until you sign back in (you'll get a warning). |
+| iPhone storage clean-up | Installing the site to your home screen (Phase 5) protects its storage; the app also asks the browser to keep it. A plain Safari tab unused for weeks may be cleared by iOS. |
+
 ## Data model
 
 **One game = one strategy page.** A game's strategy is stored at `strategies/{gameId}`, under the same ID as the game, and the security rules reject any other ID. Creating a game creates its (draft) strategy page at the same time; deleting a game deletes both. Game info lives separately from the strategy so that unpublished drafts can stay private.

@@ -9,10 +9,12 @@ export default function GameRow({
   strategy: s,
   cover,
   showToggle = false,
+  showCapture = false,
 }: {
   strategy: Strategy;
   cover?: Photo | null;
   showToggle?: boolean;
+  showCapture?: boolean;
 }) {
   const thumb = cover ?? s.photos[0];
   return (
@@ -32,7 +34,13 @@ export default function GameRow({
         </div>
       </Link>
       <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3">
-        <StatusBadge status={s.status} />
+        {showCapture ? (
+          <Link to={`/admin/capture?game=${s.id}`} className="btn btn-sm border-matrix-dim text-matrix">
+            ⚡ Capture
+          </Link>
+        ) : (
+          <StatusBadge status={s.status} />
+        )}
         {showToggle && (
           <button className="btn btn-sm" onClick={() => setStrategyStatus(s, s.status === "published" ? "draft" : "published")}>
             {s.status === "published" ? "Unpublish" : "Publish"}

@@ -1,35 +1,28 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import type { Photo } from "../lib/types";
-import { deletePhotoFiles, uploadPhoto } from "../lib/photos";
-import { errorMessage, reportError } from "../lib/writes";
+import { deletePhotoFiles } from "../lib/photos";
+import { discardQueued, enqueuePhoto } from "../lib/uploadQueue";
+import { useQueuedPhotos } from "../hooks/useUploadQueue";
+import { reportError } from "../lib/writes";
 
 interface Props {
+  gameId: string;
   photos: Photo[];
-  /** Storage folder for new uploads, e.g. "strategies/abc123". */
-  folder: string;
-  onAdd: (photo: Photo) => void;
+  /** Called with the new list after reordering or removing. */
   onChange: (photos: Photo[]) => void;
 }
 
-/** Upload, reorder, and delete a strategy's photos. */
-export default function PhotoManager({ photos, folder, onAdd, onChange }: Props) {
+/**
+ * A game page's photos: add (through the on-device upload queue, so they
+ * survive bad signal), reorder, and delete.
+ */
+export default function PhotoManager({ gameId, photos, onChange }: Props) {
   const input = useRef<HTMLInputElement>(null);
-  const [uploads, setUploads] = useState<{ key: string; name: string; progress: number }[]>([]);
+  const queued = useQueuedPhotos((i) => i.gameId === gameId, [gameId]);
 
   async function handleFiles(files: FileList | null) {
     for (const file of Array.from(files ?? [])) {
-      const key = crypto.randomUUID();
-      setUploads((u) => [...u, { key, name: file.name, progress: 0 }]);
-      try {
-        const photo = await uploadPhoto(file, folder, (progress) =>
-          setUploads((u) => u.map((x) => (x.key === key ? { ...x, progress } : x))),
-        );
-        onAdd(photo);
-      } catch (err) {
-        reportError(`Couldn't upload ${file.name}: ${errorMessage(err)}`, err);
-      } finally {
-        setUploads((u) => u.filter((x) => x.key !== key));
-      }
+      await enqueuePhoto(file, { gameId }).catch((err) => reportError("Couldn't save photo on this device", err));
     }
   }
 
@@ -71,14 +64,28 @@ export default function PhotoManager({ photos, folder, onAdd, onChange }: Props)
             </figcaption>
           </figure>
         ))}
-        {uploads.map((u) => (
-          <div key={u.key} className="card flex aspect-square flex-col items-center justify-center gap-2 p-3 text-center">
-            <span className="font-mono text-2xl text-matrix">{Math.round(u.progress * 100)}%</span>
-            <div className="h-1.5 w-full overflow-hidden rounded bg-surface-2">
-              <div className="h-full bg-matrix shadow-glow transition-all" style={{ width: `${u.progress * 100}%` }} />
-            </div>
-            <span className="w-full truncate text-xs text-muted">{u.name}</span>
-          </div>
+        {queued.map(({ item, previewUrl, progress, label }) => (
+          <figure key={item.id} className="card relative overflow-hidden border-draft/50">
+            {previewUrl && <img src={previewUrl} alt="" className="aspect-square w-full object-cover opacity-60" />}
+            <figcaption className="absolute inset-x-0 bottom-0 bg-black/75 p-2">
+              {progress !== undefined && (
+                <div className="mb-1 h-1.5 overflow-hidden rounded bg-surface-2">
+                  <div className="h-full bg-matrix shadow-glow transition-all" style={{ width: `${progress * 100}%` }} />
+                </div>
+              )}
+              <span className="font-mono text-xs text-draft">{label}</span>
+            </figcaption>
+            {progress === undefined && (
+              <button
+                type="button"
+                className="absolute top-1 right-1 rounded bg-black/70 px-1.5 text-xs text-red-300"
+                aria-label="Discard this photo"
+                onClick={() => confirm("Discard this photo? It hasn't been uploaded.") && discardQueued(item.id)}
+              >
+                ✕
+              </button>
+            )}
+          </figure>
         ))}
       </div>
 

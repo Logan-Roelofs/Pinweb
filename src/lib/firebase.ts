@@ -51,6 +51,9 @@ export const db = initializeFirestore(app, {
 });
 
 export const storage = getStorage(app);
+// Give up on a stalled upload after 1 minute (default: 10) so the upload
+// queue can mark it failed and retry later, instead of hanging on bad signal.
+storage.maxUploadRetryTime = 60_000;
 
 if (useEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });

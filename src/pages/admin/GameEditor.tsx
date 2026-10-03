@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
+import type { Editor as TiptapEditor } from "@tiptap/react";
+import NotesPanel from "../../components/NotesPanel";
 import PhotoManager from "../../components/PhotoManager";
 import RichTextEditor from "../../components/RichTextEditor";
 import StatusBadge from "../../components/StatusBadge";
 import TagInput from "../../components/TagInput";
 import { createGame, deleteGame, newGameId, setGamePhoto, subscribeGame, updateGame } from "../../data/games";
-import { addStrategyPhoto, setStrategyPhotos, setStrategyStatus, subscribeStrategy, updateStrategy } from "../../data/strategies";
+import { setStrategyPhotos, setStrategyStatus, subscribeStrategy, updateStrategy } from "../../data/strategies";
 import { saveStatusLabel, useAutosave, type SaveStatus } from "../../hooks/useAutosave";
 import { useGames } from "../../hooks/useLive";
 import { formatDate } from "../../lib/format";
@@ -102,6 +104,7 @@ function Editor({
   const [year, setYear] = useState(game?.year ? String(game.year) : "");
 
   // Strategy text
+  const editorRef = useRef<TiptapEditor | null>(null);
   const [body, setBody] = useState({ json: strategy?.body ?? "", excerpt: strategy?.excerpt ?? "" });
   const [tags, setTags] = useState(strategy?.tags ?? []);
   const text = useMemo(() => ({ body: body.json, excerpt: body.excerpt, tags }), [body, tags]);
@@ -196,16 +199,30 @@ function Editor({
         <RichTextEditor
           initialBody={strategy?.body ?? ""}
           onChange={(json, plain) => setBody({ json, excerpt: makeExcerpt(plain) })}
+          onReady={(e) => (editorRef.current = e)}
         />
       </div>
+
+      {exists && (
+        <NotesPanel
+          gameId={id}
+          photos={strategy?.photos ?? []}
+          onInsert={(noteText) => {
+            const paragraphs = noteText
+              .split(/\n+/)
+              .filter((line) => line.trim())
+              .map((line) => ({ type: "paragraph", content: [{ type: "text", text: line }] }));
+            editorRef.current?.chain().focus("end").insertContent(paragraphs).run();
+          }}
+        />
+      )}
 
       <div>
         <span className="label">Photos</span>
         {exists ? (
           <PhotoManager
+            gameId={id}
             photos={strategy?.photos ?? []}
-            folder={`strategies/${id}`}
-            onAdd={(p) => addStrategyPhoto(id, p)}
             onChange={(photos) => setStrategyPhotos(id, photos)}
           />
         ) : (

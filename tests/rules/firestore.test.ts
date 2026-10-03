@@ -107,8 +107,13 @@ describe("admin", () => {
     await assertSucceeds(deleteDoc(doc(db, "games/afm")));
   });
 
-  it("can write notes", async () => {
-    await assertSucceeds(setDoc(doc(adminDb(), "strategies/draft/notes/n2"), { text: "hit the castle", photoIds: [] }));
+  it("can write notes, link photos, and mark them merged", async () => {
+    const db = adminDb();
+    const note = doc(db, "strategies/draft/notes/n2");
+    await assertSucceeds(setDoc(note, { text: "hit the castle", createdAt: new Date(), updatedAt: new Date() }, { merge: true }));
+    await assertSucceeds(updateDoc(note, { photoIds: ["p1"], updatedAt: new Date() }));
+    await assertSucceeds(updateDoc(note, { mergedAt: new Date() }));
+    await assertFails(updateDoc(note, { somethingElse: true }));
   });
 });
 

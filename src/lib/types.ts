@@ -50,6 +50,18 @@ export interface Strategy {
   publishedAt: Timestamp | null;
 }
 
+/** A Quick Capture note: strategies/{gameId}/notes/{id}. Admin only. */
+export interface Note {
+  id: string;
+  text: string;
+  /** Strategy photo ids taken during this capture. */
+  photoIds?: string[];
+  createdAt: Timestamp | null;
+  updatedAt: Timestamp | null;
+  /** Set once the note has been added into the strategy text. */
+  mergedAt?: Timestamp | null;
+}
+
 export const SUGGESTED_TAGS = ["multiball", "wizard-mode", "skill-shot", "beginner", "advanced"];
 
 /** "Wizard Mode!" → "wizard-mode" */

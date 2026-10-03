@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react";
 import { parseBody, richTextExtensions } from "../lib/richText";
 
@@ -5,10 +6,11 @@ interface Props {
   /** Initial body (JSON string). Later changes to this prop are ignored. */
   initialBody: string;
   onChange: (body: string, plainText: string) => void;
-  placeholder?: string;
+  /** Gives the parent the editor, e.g. to insert notes into it. */
+  onReady?: (editor: Editor) => void;
 }
 
-export default function RichTextEditor({ initialBody, onChange }: Props) {
+export default function RichTextEditor({ initialBody, onChange, onReady }: Props) {
   const editor = useEditor({
     extensions: richTextExtensions,
     content: parseBody(initialBody) ?? "",
@@ -22,6 +24,11 @@ export default function RichTextEditor({ initialBody, onChange }: Props) {
       onChange(editor.isEmpty ? "" : JSON.stringify(editor.getJSON()), editor.getText());
     },
   });
+
+  useEffect(() => {
+    onReady?.(editor);
+    // Only once per editor instance, so onReady isn't a dependency.
+  }, [editor]);
 
   return (
     <div className="card overflow-hidden focus-within:border-matrix-dim">

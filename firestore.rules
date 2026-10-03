@@ -41,7 +41,7 @@ service cloud.firestore {
     }
 
     function validNote(d) {
-      return d.keys().hasOnly(['text', 'photoIds', 'createdAt', 'updatedAt'])
+      return d.keys().hasOnly(['text', 'photoIds', 'createdAt', 'updatedAt', 'mergedAt'])
         && d.text is string && d.text.size() <= 100000
         && (!('photoIds' in d) || (d.photoIds is list && d.photoIds.size() <= 100));
     }
