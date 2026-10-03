@@ -1,4 +1,12 @@
 import { initializeApp } from "firebase/app";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import {
+  connectFirestoreEmulator,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from "firebase/firestore";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 /**
  * Firebase web config comes from Vite env vars (.env locally, GitHub
@@ -21,6 +29,31 @@ export const useEmulators = import.meta.env.VITE_USE_EMULATORS === "true";
 export const app = initializeApp(
   useEmulators
     ? // The emulators accept any values; "demo-" project IDs never touch real Firebase.
-      { ...config, apiKey: config.apiKey || "demo-key", projectId: "demo-pinweb" }
+      {
+        ...config,
+        apiKey: config.apiKey || "demo-key",
+        projectId: "demo-pinweb",
+        storageBucket: "demo-pinweb.appspot.com",
+      }
     : config,
 );
+
+/** Auth keeps the session in IndexedDB by default, so you stay logged in. */
+export const auth = getAuth(app);
+
+/**
+ * Firestore with a persistent offline cache: reads work offline and writes
+ * are queued in IndexedDB until the device is back online, even across
+ * closing the app. The multi-tab manager lets several open tabs share it.
+ */
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+});
+
+export const storage = getStorage(app);
+
+if (useEmulators) {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
+}

@@ -49,6 +49,70 @@
   }
 }
 
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 cursor-pointer whitespace-nowrap items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-4 py-2 font-mono text-sm text-text no-underline transition hover:border-matrix-dim hover:no-underline disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border-matrix bg-matrix font-bold text-bg hover:bg-matrix-soft hover:shadow-glow;
+  }
+  .btn-danger {
+    @apply border-red-900 text-red-300 hover:border-red-500 hover:bg-red-950;
+  }
+  .btn-sm {
+    @apply min-h-9 px-3 py-1 text-xs;
+  }
+  .input {
+    @apply w-full rounded-lg border border-line bg-surface-2 px-3 py-2 text-text placeholder:text-muted/70 focus:border-matrix focus:outline-none;
+    /* 16px+ stops iOS Safari from zooming into fields */
+    font-size: max(16px, 1rem);
+  }
+  .label {
+    @apply mb-1 block font-mono text-xs tracking-wide text-muted uppercase;
+  }
+  .card {
+    @apply rounded-xl border border-line bg-surface;
+  }
+
+  /* Rich text: shared by the editor and the public strategy page. */
+  .rich-text {
+    @apply leading-relaxed;
+  }
+  .rich-text > * + * {
+    @apply mt-4;
+  }
+  .rich-text h2 {
+    @apply mt-8 text-2xl font-bold;
+  }
+  .rich-text h3 {
+    @apply mt-6 text-xl font-bold;
+  }
+  .rich-text ul {
+    @apply list-disc pl-6;
+  }
+  .rich-text ol {
+    @apply list-decimal pl-6;
+  }
+  .rich-text li + li {
+    @apply mt-1;
+  }
+  .rich-text li > p {
+    @apply m-0;
+  }
+  .rich-text strong {
+    @apply font-bold text-white;
+  }
+  .rich-text blockquote {
+    @apply border-l-2 border-matrix-dim pl-4 text-muted italic;
+  }
+  .rich-text code {
+    @apply rounded bg-surface-2 px-1 font-mono text-sm text-matrix-soft;
+  }
+  .rich-text hr {
+    @apply border-line;
+  }
+}
+
 @utility text-glow {
   text-shadow: 0 0 10px rgb(0 255 102 / 0.45), 0 0 2px rgb(0 255 102 / 0.7);
 }

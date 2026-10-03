@@ -16,13 +16,17 @@ cp .env.example .env     # then fill in the values (see "Firebase setup" step 4)
 npm run dev              # http://localhost:5173
 ```
 
+`npm run dev` talks to your **real** Firebase project, so anything you create there is real.
+
 ### Local development with the emulators (no real data touched)
 
-The Firebase Emulator Suite runs fake Auth, Firestore, and Storage on your computer.
+The Firebase Emulator Suite runs fake Auth, Firestore, and Storage on your computer. It's safe for experimenting.
 
-1. In `.env`, set `VITE_USE_EMULATORS=true`.
-2. In one terminal, run `npm run emulators`. The emulator dashboard is at http://localhost:4000.
-3. In another terminal, run `npm run dev`.
+1. Terminal 1: run `npm run emulators`. The emulator dashboard is at http://localhost:4000.
+2. Terminal 2: run `npm run seed`. This creates a test admin login and sample games and strategies. The test login is at the top of [scripts/seed-emulators.ts](scripts/seed-emulators.ts).
+3. Terminal 2: run `npm run dev:emulators`, then open http://localhost:5173/admin.
+
+The emulators start empty each time, so run `npm run seed` again after restarting them.
 
 ### Tests
 
@@ -57,6 +61,10 @@ New projects need Blaze to use Cloud Storage. Blaze still has a free allowance, 
 3. Open the **Users** tab and click **Add user**. Enter your email and a strong password.
 4. Copy the **User UID** shown in the list. Phase 2 puts it into the security rules.
 5. There is no sign-up page on the site, so this is the only account.
+6. **Block sign-ups completely.** Even without a sign-up page, anyone could create an account by calling Firebase directly.
+   - Go to **Authentication → Settings → User actions**, uncheck **Enable create (sign-up)**, and click **Save**.
+   - The security rules already ignore every account except yours. This step just keeps out junk accounts.
+7. If you ever replace your admin account, put the new UID in `firestore.rules`, `storage.rules`, and `src/lib/admin.ts`.
 
 **Firestore**
 1. Go to **Build → Firestore Database → Create database**.
@@ -96,6 +104,16 @@ These values aren't secret, since every visitor's browser receives them. The sec
    - Paste it into GitHub (next step).
    - Then **delete the file** from your Downloads folder.
    - Never commit it. The `.gitignore` also blocks common service-account filenames.
+
+### 6. Let Storage rules check Firestore (one time)
+A strategy's photos are only public once the strategy is published. To check that, the Storage rules look at the strategy in Firestore. Google needs a one-time permission for this. The automatic deploy can't grant it, so do it once by hand:
+
+1. Open [Google Cloud console → IAM](https://console.cloud.google.com/iam-admin/iam) and pick your project at the top.
+2. Tick **Include Google-provided role grants** (top right of the table).
+3. Find the principal named `service-<numbers>@gcp-sa-firebasestorage.iam.gserviceaccount.com` and click its pencil icon.
+4. Click **Add another role**, choose **Firebase Rules Firestore Service Agent**, and click **Save**.
+
+You'll know it's missing if photos on *published* strategies show as broken images for logged-out visitors.
 
 ---
 
@@ -141,10 +159,26 @@ firestore.rules                Firestore security rules
 storage.rules                  Storage security rules
 firestore.indexes.json         Firestore composite indexes
 tests/rules/                   Security-rules tests (run against the emulators)
+scripts/seed-emulators.ts      Test admin + sample data for the local emulators
 src/
-  lib/firebase.ts              Firebase initialization
-  components/                  Shared UI (layout, etc.)
+  lib/firebase.ts              Firebase setup (offline cache, emulator switch)
+  lib/admin.ts                 Admin UID (the UI's copy; the rules enforce it)
+  lib/photos.ts                Compress + upload images
+  lib/richText.ts              Allowed text formatting (editor + public pages)
+  data/                        All Firestore reads/writes (games, strategies)
+  hooks/                       useAuth, useAutosave, live data hooks
+  components/                  Shared UI (editor, photo manager, game picker…)
   pages/public/                Public pages
-  pages/admin/                 Admin pages (Phase 2+)
+  pages/admin/                 Admin pages, served at /admin
   index.css                    Tailwind + Matrix theme colors/fonts
+
+## Data model
+
+| Collection | Fields | Who can read |
+|---|---|---|
+| `games/{id}` | name, nameLower, manufacturer, year, photo, createdAt, updatedAt | Everyone |
+| `strategies/{id}` | gameId, gameName, title, titleLower, body (TipTap JSON), excerpt, photos[], tags[], status, createdAt, updatedAt, publishedAt | Everyone if `status == "published"`, otherwise admin only |
+| `strategies/{id}/notes/{id}` | text, photoIds[], createdAt, updatedAt | Admin only |
+
+Photos are stored in Storage at `games/{gameId}/…` and `strategies/{strategyId}/{photoId}.jpg` (+ `_thumb.jpg`). They're compressed on the device to at most 2000px (under about 1 MB) before uploading.
 ```

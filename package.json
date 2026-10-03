@@ -5,15 +5,21 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:emulators": "vite --mode emulators",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "typecheck": "tsc",
     "emulators": "firebase emulators:start --project demo-pinweb",
+    "seed": "node scripts/seed-emulators.ts",
     "test:rules": "firebase emulators:exec --only firestore,storage --project demo-pinweb \"vitest run\""
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
+    "@tiptap/pm": "^3.31.4",
+    "@tiptap/react": "^3.31.4",
+    "@tiptap/starter-kit": "^3.31.4",
+    "browser-image-compression": "^2.0.2",
     "firebase": "^12.19.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

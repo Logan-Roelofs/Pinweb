@@ -1,11 +1,37 @@
 rules_version = '2';
 
-// Phase 1: lock everything down. Real rules (image type/size checks,
-// admin-only uploads) arrive in Phase 2.
+// Who can do what:
+//   • Everyone: view game photos, and photos of PUBLISHED strategies.
+//   • Admin (one UID): upload/delete images (JPEG, PNG, or WebP only, under 5 MB) and view everything.
+//
+// Strategy photo access looks up the strategy's status in Firestore (a
+// "cross-service" rule). See the README for the one-time permission this needs.
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read, write: if false;
+
+    // Keep in sync with src/lib/admin.ts and firestore.rules.
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'coSz3U5jiVaLysbqclMsuXPGAqi2';
     }
+
+    function isValidImage() {
+      return request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    match /games/{gameId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidImage();
+      allow delete: if isAdmin();
+    }
+
+    match /strategies/{strategyId}/{fileName} {
+      allow read: if isAdmin()
+        || firestore.get(/databases/(default)/documents/strategies/$(strategyId)).data.status == 'published';
+      allow create, update: if isAdmin() && isValidImage();
+      allow delete: if isAdmin();
+    }
+
+    // Anything not matched above is denied by default.
   }
 }
