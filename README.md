@@ -183,6 +183,6 @@ src/
 | `strategies/{gameId}` | gameId, gameName, body (TipTap JSON), excerpt, photos[], tags[], status, createdAt, updatedAt, publishedAt | Everyone if `status == "published"`, otherwise admin only |
 | `strategies/{gameId}/notes/{id}` | text, photoIds[], createdAt, updatedAt | Admin only |
 
-Public URLs: `/games` (all published games, with search and tag filter) and `/games/{gameId}` (a game's strategy page). Admin: `/admin/games/{gameId}` edits the game info and its strategy on one page.
+Public URLs: `/games` (all published games, with search and tag filter) and `/games/{gameId}` (a game's strategy page). Admin: `/admin/games/{gameId}` edits the game info and its strategy on one page. `/admin/games/new` opens the same editor empty; the game is saved as soon as it has a name (manufacturer, year, cover, and tags are optional and can be filled in any time).
 
 Photos are stored in Storage at `games/{gameId}/…` (cover) and `strategies/{gameId}/{photoId}.jpg` (+ `_thumb.jpg`). They're compressed on the device to at most 2000px (under about 1 MB) before uploading.

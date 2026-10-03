@@ -1,27 +1,51 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import PhotoManager from "../../components/PhotoManager";
 import RichTextEditor from "../../components/RichTextEditor";
 import StatusBadge from "../../components/StatusBadge";
 import TagInput from "../../components/TagInput";
-import { deleteGame, setGamePhoto, subscribeGame, updateGame } from "../../data/games";
+import { createGame, deleteGame, newGameId, setGamePhoto, subscribeGame, updateGame } from "../../data/games";
 import { addStrategyPhoto, setStrategyPhotos, setStrategyStatus, subscribeStrategy, updateStrategy } from "../../data/strategies";
 import { saveStatusLabel, useAutosave, type SaveStatus } from "../../hooks/useAutosave";
+import { useGames } from "../../hooks/useLive";
 import { formatDate } from "../../lib/format";
 import { deletePhotoFiles, uploadPhoto } from "../../lib/photos";
 import { makeExcerpt } from "../../lib/richText";
 import type { Game, Strategy } from "../../lib/types";
 import { errorMessage, reportError } from "../../lib/writes";
 
-/** Loads a game and its strategy page live, then shows the editor for both. */
+/**
+ * /admin/games/:id edits a game. /admin/games/new opens the same editor,
+ * empty: the game is created as soon as it has a name, and the URL then
+ * switches to its id without reloading the editor (so typing isn't interrupted).
+ */
 export default function GameEditor() {
-  const { id = "" } = useParams();
+  const { id: param = "" } = useParams();
+  const location = useLocation();
+  // Identifies one "new game" session, carried across the URL switch. Only
+  // sessions from this page load count: browsers keep history state across a
+  // reload, and a reloaded page should just load the saved game.
+  const carried = (location.state as { freshKey?: string } | null)?.freshKey;
+  const freshKey = param === "new" ? location.key : carried && freshSessions.has(carried) ? carried : undefined;
+  return <Loader key={freshKey ? `new:${freshKey}` : param} param={param} freshKey={freshKey} />;
+}
+
+/** freshKey → the id reserved for that new game. In memory only. */
+const freshSessions = new Map<string, string>();
+
+function Loader({ param, freshKey }: { param: string; freshKey?: string }) {
+  const [freshId] = useState(() => {
+    if (!freshKey) return "";
+    const id = freshSessions.get(freshKey) ?? newGameId();
+    freshSessions.set(freshKey, id);
+    return id;
+  });
+  const isFresh = !!freshKey;
+  const id = isFresh ? freshId : param;
   const [game, setGame] = useState<Game | null | undefined>(undefined);
   const [strategy, setStrategy] = useState<Strategy | null | undefined>(undefined);
 
   useEffect(() => {
-    setGame(undefined);
-    setStrategy(undefined);
     const offGame = subscribeGame(id, setGame);
     const offStrategy = subscribeStrategy(id, setStrategy);
     return () => {
@@ -30,45 +54,85 @@ export default function GameEditor() {
     };
   }, [id]);
 
-  if (game === undefined || strategy === undefined) return <p className="text-muted">Loading…</p>;
-  if (!game || !strategy)
-    return (
-      <p>
-        Game not found. <Link to="/admin/games">Back to list</Link>
-      </p>
-    );
-  return <Editor key={id} game={game} strategy={strategy} />;
+  if (!isFresh) {
+    if (game === undefined || strategy === undefined) return <p className="text-muted">Loading…</p>;
+    if (!game || !strategy)
+      return (
+        <p>
+          Game not found. <Link to="/admin/games">Back to list</Link>
+        </p>
+      );
+  }
+  return <Editor id={id} game={game ?? null} strategy={strategy ?? null} freshKey={freshKey} />;
 }
 
 /**
  * Text fields are edited locally and autosaved (their initial values come
  * from the first load). Photos, status, and cover stay live from Firestore.
+ * `game`/`strategy` are null for a new game that hasn't been saved yet.
  */
-function Editor({ game, strategy }: { game: Game; strategy: Strategy }) {
+function Editor({
+  id,
+  game,
+  strategy,
+  freshKey,
+}: {
+  id: string;
+  game: Game | null;
+  strategy: Strategy | null;
+  freshKey?: string;
+}) {
   const navigate = useNavigate();
-  const id = game.id;
+  const allGames = useGames();
+  const [createdHere, setCreatedHere] = useState(false);
+  // Declared before the autosaves so it's cleared first on unmount: a final
+  // save while leaving the page must not navigate back here.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  const exists = !!game || createdHere;
 
   // Game info
-  const [name, setName] = useState(game.name);
-  const [manufacturer, setManufacturer] = useState(game.manufacturer ?? "");
-  const [year, setYear] = useState(game.year ? String(game.year) : "");
-  const info = useMemo(() => ({ name, manufacturer, year }), [name, manufacturer, year]);
-  const infoSave = useAutosave(info, (f) =>
-    f.name.trim()
-      ? updateGame(id, { name: f.name, manufacturer: f.manufacturer || null, year: f.year ? Number(f.year) : null })
-      : Promise.resolve(),
-  );
+  const [name, setName] = useState(game?.name ?? "");
+  const [manufacturer, setManufacturer] = useState(game?.manufacturer ?? "");
+  const [year, setYear] = useState(game?.year ? String(game.year) : "");
 
   // Strategy text
-  const [body, setBody] = useState({ json: strategy.body, excerpt: strategy.excerpt });
-  const [tags, setTags] = useState(strategy.tags);
+  const [body, setBody] = useState({ json: strategy?.body ?? "", excerpt: strategy?.excerpt ?? "" });
+  const [tags, setTags] = useState(strategy?.tags ?? []);
   const text = useMemo(() => ({ body: body.json, excerpt: body.excerpt, tags }), [body, tags]);
-  const textSave = useAutosave(text, (f) => updateStrategy(id, f));
+  const latestText = useRef(text);
+  latestText.current = text;
 
-  const published = strategy.status === "published";
+  // A new game can't reuse an existing game's name (one page per game).
+  const duplicate = !exists ? allGames?.find((g) => g.nameLower === name.trim().toLowerCase()) : undefined;
+
+  const info = useMemo(() => ({ name, manufacturer, year }), [name, manufacturer, year]);
+  const infoSave = useAutosave(info, (f) => {
+    if (!f.name.trim()) return Promise.resolve();
+    const input = { name: f.name, manufacturer: f.manufacturer || null, year: f.year ? Number(f.year) : null };
+    if (exists) return updateGame(id, input);
+    if (duplicate) return Promise.resolve();
+    // First save of a new game: create it with everything typed so far.
+    createGame(input, { id, ...latestText.current });
+    if (mounted.current) {
+      setCreatedHere(true);
+      navigate(`/admin/games/${id}`, { replace: true, state: { freshKey } });
+    }
+    return Promise.resolve();
+  });
+  // Text typed before the game has a name is included when it's created.
+  const textSave = useAutosave(text, (f) => (exists ? updateStrategy(id, f) : Promise.resolve()));
+
+  const status = strategy?.status ?? "draft";
+  const published = status === "published";
 
   async function handleDelete() {
-    if (!confirm(`Delete “${game.name}”, its strategy, and all its photos? This can't be undone.`)) return;
+    if (!game || !confirm(`Delete “${game.name}”, its strategy, and all its photos? This can't be undone.`)) return;
     await deleteGame(game, strategy).catch((err) => reportError("Couldn't delete game", err));
     navigate("/admin/games", { replace: true });
   }
@@ -79,40 +143,83 @@ function Editor({ game, strategy }: { game: Game; strategy: Strategy }) {
         <Link to="/admin/games" className="font-mono text-sm">
           ← All games
         </Link>
-        <SaveIndicator statuses={[infoSave.status, textSave.status]} />
+        {exists ? (
+          <SaveIndicator statuses={[infoSave.status, textSave.status]} />
+        ) : (
+          <span className="font-mono text-xs text-draft">Not saved yet: give the game a name</span>
+        )}
       </div>
 
-      <div className="card flex flex-wrap items-center gap-3 p-4">
-        <StatusBadge status={strategy.status} />
-        <span className="flex-1 text-sm text-muted">
-          {published ? `Visible to everyone · first published ${formatDate(strategy.publishedAt)}` : "Only you can see this"}
-        </span>
-        <Link to={`/games/${id}`} className="btn">
-          {published ? "View" : "Preview"}
-        </Link>
-        <button
-          className={`btn ${published ? "" : "btn-primary"}`}
-          onClick={() => setStrategyStatus(strategy, published ? "draft" : "published")}
-        >
-          {published ? "Unpublish" : "Publish"}
-        </button>
-      </div>
-
-      <section className="space-y-4">
-        <div>
-          <label className="label" htmlFor="name">
-            Game name
-          </label>
-          <input
-            id="name"
-            className="input text-lg font-semibold"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            maxLength={100}
-          />
-          {!name.trim() && <p className="mt-1 text-sm text-draft">A name is required. Changes won't save until it has one.</p>}
+      {exists && strategy && (
+        <div className="card flex flex-wrap items-center gap-3 p-4">
+          <StatusBadge status={status} />
+          <span className="flex-1 text-sm text-muted">
+            {published ? `Visible to everyone · first published ${formatDate(strategy.publishedAt)}` : "Only you can see this"}
+          </span>
+          <Link to={`/games/${id}`} className="btn">
+            {published ? "View" : "Preview"}
+          </Link>
+          <button
+            className={`btn ${published ? "" : "btn-primary"}`}
+            onClick={() => setStrategyStatus(strategy, published ? "draft" : "published")}
+          >
+            {published ? "Unpublish" : "Publish"}
+          </button>
         </div>
+      )}
+
+      <div>
+        <label className="label" htmlFor="name">
+          Game name
+        </label>
+        <input
+          id="name"
+          className="input text-lg font-semibold"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. Medieval Madness"
+          required
+          maxLength={100}
+          autoFocus={!exists}
+        />
+        {duplicate ? (
+          <p className="mt-1 text-sm text-draft">
+            “{duplicate.name}” already has a page. <Link to={`/admin/games/${duplicate.id}`}>Open it →</Link>
+          </p>
+        ) : (
+          exists && !name.trim() && <p className="mt-1 text-sm text-draft">A name is required. Changes won't save until it has one.</p>
+        )}
+      </div>
+
+      <div>
+        <span className="label">Strategy</span>
+        <RichTextEditor
+          initialBody={strategy?.body ?? ""}
+          onChange={(json, plain) => setBody({ json, excerpt: makeExcerpt(plain) })}
+        />
+      </div>
+
+      <div>
+        <span className="label">Photos</span>
+        {exists ? (
+          <PhotoManager
+            photos={strategy?.photos ?? []}
+            folder={`strategies/${id}`}
+            onAdd={(p) => addStrategyPhoto(id, p)}
+            onChange={(photos) => setStrategyPhotos(id, photos)}
+          />
+        ) : (
+          <p className="text-sm text-muted">Name the game to add photos.</p>
+        )}
+      </div>
+
+      <div>
+        <span className="label">Tags</span>
+        <TagInput tags={tags} onChange={setTags} />
+      </div>
+
+      <section className="card space-y-4 p-4">
+        <h2 className="font-mono text-sm text-muted uppercase">Details (optional)</h2>
         <div className="grid grid-cols-3 gap-3">
           <div className="col-span-2">
             <label className="label" htmlFor="manufacturer">
@@ -143,37 +250,16 @@ function Editor({ game, strategy }: { game: Game; strategy: Strategy }) {
             />
           </div>
         </div>
-        <CoverPhoto game={game} />
+        {game ? <CoverPhoto game={game} /> : <p className="text-sm text-muted">Name the game to add a cover photo.</p>}
       </section>
 
-      <div>
-        <span className="label">Strategy</span>
-        <RichTextEditor
-          initialBody={strategy.body}
-          onChange={(json, plain) => setBody({ json, excerpt: makeExcerpt(plain) })}
-        />
-      </div>
-
-      <div>
-        <span className="label">Photos</span>
-        <PhotoManager
-          photos={strategy.photos}
-          folder={`strategies/${id}`}
-          onAdd={(p) => addStrategyPhoto(id, p)}
-          onChange={(photos) => setStrategyPhotos(id, photos)}
-        />
-      </div>
-
-      <div>
-        <span className="label">Tags</span>
-        <TagInput tags={tags} onChange={setTags} />
-      </div>
-
-      <div className="border-t border-line pt-6">
-        <button className="btn btn-danger" onClick={handleDelete}>
-          Delete game
-        </button>
-      </div>
+      {game && (
+        <div className="border-t border-line pt-6">
+          <button className="btn btn-danger" onClick={handleDelete}>
+            Delete game
+          </button>
+        </div>
+      )}
     </div>
   );
 }

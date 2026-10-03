@@ -43,23 +43,31 @@ export async function getGame(id: string): Promise<Game | null> {
   return snap.exists() ? fromSnap<Game>(snap) : null;
 }
 
+/** A new game id, made on the device (works offline). */
+export function newGameId(): string {
+  return doc(games).id;
+}
+
 /**
- * Creates a game together with its (empty, draft) strategy page, and returns
- * the id right away. The id is made on the device, so this works offline;
- * the write syncs when the connection is back.
+ * Creates a game together with its draft strategy page (optionally with text
+ * already written) and returns the id right away. Works offline; the write
+ * syncs when the connection is back.
  */
-export function createGame(input: GameInput): string {
-  const gameRef = doc(games);
+export function createGame(
+  input: GameInput,
+  options: { id?: string; body?: string; excerpt?: string; tags?: string[] } = {},
+): string {
+  const gameRef = options.id ? doc(games, options.id) : doc(games);
   const data = cleanInput(input);
   const batch = writeBatch(db);
   batch.set(gameRef, { ...data, photo: null, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
   batch.set(doc(db, "strategies", gameRef.id), {
     gameId: gameRef.id,
     gameName: data.name,
-    body: "",
-    excerpt: "",
+    body: options.body ?? "",
+    excerpt: options.excerpt ?? "",
     photos: [],
-    tags: [],
+    tags: options.tags ?? [],
     status: "draft",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

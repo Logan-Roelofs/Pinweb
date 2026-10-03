@@ -10,7 +10,6 @@ import NotFound from "./pages/public/NotFound";
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
 const GameList = lazy(() => import("./pages/admin/GameList"));
-const GameNew = lazy(() => import("./pages/admin/GameNew"));
 const GameEditor = lazy(() => import("./pages/admin/GameEditor"));
 
 const loading = <p className="p-8 text-center font-mono text-muted">&gt; loading…</p>;
@@ -39,7 +38,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: page(<AdminHome />) },
       { path: "games", element: page(<GameList />) },
-      { path: "games/new", element: page(<GameNew />) },
+      // "games/new" opens the editor empty (see GameEditor).
       { path: "games/:id", element: page(<GameEditor />) },
     ],
   },
