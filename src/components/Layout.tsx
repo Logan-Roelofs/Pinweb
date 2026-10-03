@@ -27,9 +27,6 @@ export default function Layout() {
             <NavLink to="/games" className={tab}>
               Games
             </NavLink>
-            <NavLink to="/search" className={tab}>
-              Search
-            </NavLink>
             {isAdmin && (
               <NavLink to="/admin" className={tab}>
                 Admin

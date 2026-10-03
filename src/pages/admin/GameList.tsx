@@ -1,11 +1,31 @@
-import { Link } from "react-router";
+import { useMemo } from "react";
+import { Link, useSearchParams } from "react-router";
 import { useAllStrategies, useGames } from "../../hooks/useLive";
+import GameRow from "./GameRow";
 
 export default function GameList() {
-  const games = useGames();
   const strategies = useAllStrategies();
+  const games = useGames();
+  // Filters live in the URL so they survive reloads and the back button.
+  const [params, setParams] = useSearchParams();
+  const q = params.get("q") ?? "";
+  const status = params.get("status") ?? "";
 
-  const countFor = (gameId: string) => strategies?.filter((s) => s.gameId === gameId).length ?? 0;
+  const setFilter = (key: string, value: string) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true });
+  };
+
+  const covers = useMemo(() => new Map(games?.map((g) => [g.id, g.photo])), [games]);
+  const filtered = useMemo(
+    () =>
+      strategies
+        ?.filter((s) => (!status || s.status === status) && s.gameName.toLowerCase().includes(q.trim().toLowerCase()))
+        .sort((a, b) => a.gameName.localeCompare(b.gameName)),
+    [strategies, q, status],
+  );
 
   return (
     <div className="space-y-4">
@@ -15,29 +35,31 @@ export default function GameList() {
           + New game
         </Link>
       </div>
-      {!games ? (
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <input
+          className="input"
+          type="search"
+          value={q}
+          onChange={(e) => setFilter("q", e.target.value)}
+          placeholder="Search games…"
+          aria-label="Search games"
+        />
+        <select className="input" value={status} onChange={(e) => setFilter("status", e.target.value)} aria-label="Filter by status">
+          <option value="">Drafts and published</option>
+          <option value="draft">Drafts only</option>
+          <option value="published">Published only</option>
+        </select>
+      </div>
+
+      {!filtered ? (
         <p className="text-muted">Loading…</p>
-      ) : games.length === 0 ? (
-        <p className="text-muted">No games yet.</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-muted">{strategies?.length ? "No games match." : "No games yet. Add your first one!"}</p>
       ) : (
         <ul className="space-y-2">
-          {games.map((g) => (
-            <li key={g.id} className="card flex items-center gap-3 p-3 hover:border-matrix-dim">
-              <Link to={`/admin/games/${g.id}`} className="flex min-w-0 flex-1 items-center gap-3 text-text no-underline hover:no-underline">
-                {g.photo ? (
-                  <img src={g.photo.thumbUrl} alt="" className="size-12 shrink-0 rounded-md object-cover" />
-                ) : (
-                  <div className="size-12 shrink-0 rounded-md border border-line bg-surface-2" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold">{g.name}</div>
-                  <div className="text-sm text-muted">{[g.manufacturer, g.year].filter(Boolean).join(" · ") || "—"}</div>
-                </div>
-              </Link>
-              <Link to={`/admin/strategies?game=${g.id}`} className="shrink-0 font-mono text-xs">
-                {countFor(g.id)} strateg{countFor(g.id) === 1 ? "y" : "ies"}
-              </Link>
-            </li>
+          {filtered.map((s) => (
+            <GameRow key={s.id} strategy={s} cover={covers.get(s.id)} showToggle />
           ))}
         </ul>
       )}

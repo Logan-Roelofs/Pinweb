@@ -171,14 +171,18 @@ src/
   pages/public/                Public pages
   pages/admin/                 Admin pages, served at /admin
   index.css                    Tailwind + Matrix theme colors/fonts
+```
 
 ## Data model
 
+**One game = one strategy page.** A game's strategy is stored at `strategies/{gameId}`, under the same ID as the game, and the security rules reject any other ID. Creating a game creates its (draft) strategy page at the same time; deleting a game deletes both. Game info lives separately from the strategy so that unpublished drafts can stay private.
+
 | Collection | Fields | Who can read |
 |---|---|---|
-| `games/{id}` | name, nameLower, manufacturer, year, photo, createdAt, updatedAt | Everyone |
-| `strategies/{id}` | gameId, gameName, title, titleLower, body (TipTap JSON), excerpt, photos[], tags[], status, createdAt, updatedAt, publishedAt | Everyone if `status == "published"`, otherwise admin only |
-| `strategies/{id}/notes/{id}` | text, photoIds[], createdAt, updatedAt | Admin only |
+| `games/{gameId}` | name, nameLower, manufacturer, year, photo (cover), createdAt, updatedAt | Everyone |
+| `strategies/{gameId}` | gameId, gameName, body (TipTap JSON), excerpt, photos[], tags[], status, createdAt, updatedAt, publishedAt | Everyone if `status == "published"`, otherwise admin only |
+| `strategies/{gameId}/notes/{id}` | text, photoIds[], createdAt, updatedAt | Admin only |
 
-Photos are stored in Storage at `games/{gameId}/…` and `strategies/{strategyId}/{photoId}.jpg` (+ `_thumb.jpg`). They're compressed on the device to at most 2000px (under about 1 MB) before uploading.
-```
+Public URLs: `/games` (all published games, with search and tag filter) and `/games/{gameId}` (a game's strategy page). Admin: `/admin/games/{gameId}` edits the game info and its strategy on one page.
+
+Photos are stored in Storage at `games/{gameId}/…` (cover) and `strategies/{gameId}/{photoId}.jpg` (+ `_thumb.jpg`). They're compressed on the device to at most 2000px (under about 1 MB) before uploading.

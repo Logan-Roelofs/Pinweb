@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 
-/** A tag that links to search results for it. `relative z-10` keeps it clickable inside cards. */
+/** A tag that links to the games list filtered by it. `relative z-10` keeps it clickable inside cards. */
 export default function TagChip({ tag, active = false }: { tag: string; active?: boolean }) {
   return (
     <Link
-      to={active ? "/search" : `/search?tag=${encodeURIComponent(tag)}`}
+      to={active ? "/games" : `/games?tag=${encodeURIComponent(tag)}`}
       aria-pressed={active}
       className={`relative z-10 inline-flex min-h-7 items-center rounded-full border px-2.5 font-mono text-xs no-underline transition hover:no-underline ${
         active

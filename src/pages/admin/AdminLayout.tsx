@@ -39,9 +39,6 @@ export default function AdminLayout() {
             <NavLink to="/admin" end className={tab}>
               Home
             </NavLink>
-            <NavLink to="/admin/strategies" className={tab}>
-              Strategies
-            </NavLink>
             <NavLink to="/admin/games" className={tab}>
               Games
             </NavLink>

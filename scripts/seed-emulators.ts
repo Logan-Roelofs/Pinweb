@@ -41,33 +41,28 @@ const bullets = (...items: string[]) => ({
   content: items.map((t) => ({ type: "listItem", content: [p(t)] })),
 });
 
+// One strategy page per game, stored under the game's id.
 const strategies = [
   {
-    id: "mm-castle",
     gameId: "medieval-madness",
-    title: "Destroy the castle fast",
     tags: ["multiball", "beginner"],
     status: "published",
     days: 1,
     body: body(
-      h2("The plan"),
+      h2("Destroy the castle"),
       p("Raise the drawbridge, then hit the castle gate until it breaks."),
       bullets("Skill shot: plunge softly for the left ramp", "Trap up on the right flipper before shooting the gate"),
     ),
   },
   {
-    id: "afm-total",
     gameId: "attack-from-mars",
-    title: "Stroke of Luck and Total Annihilation",
     tags: ["wizard-mode", "advanced"],
     status: "published",
     days: 5,
-    body: body(h2("Getting there"), p("Destroy every saucer and conquer all the cities.")),
+    body: body(h2("Rule the Universe"), p("Destroy every saucer and conquer all the cities.")),
   },
   {
-    id: "godzilla-draft",
     gameId: "godzilla",
-    title: "Building the mechagodzilla route",
     tags: ["multiball"],
     status: "draft",
     days: 0,
@@ -82,12 +77,11 @@ await env.withSecurityRulesDisabled(async (ctx) => {
     await setDoc(doc(db, "games", id), { ...data, nameLower: data.name.toLowerCase(), photo: null, createdAt: now, updatedAt: now });
   }
   for (const s of strategies) {
-    const { id, days, ...data } = s;
+    const { days, ...data } = s;
     const game = games.find((g) => g.id === data.gameId)!;
-    await setDoc(doc(db, "strategies", id), {
+    await setDoc(doc(db, "strategies", data.gameId), {
       ...data,
       gameName: game.name,
-      titleLower: data.title.toLowerCase(),
       excerpt: [...data.body.matchAll(/"text":"([^"]*)"/g)].map((m) => m[1]).join(" "),
       photos: [],
       createdAt: ago(days + 1),
@@ -98,5 +92,5 @@ await env.withSecurityRulesDisabled(async (ctx) => {
 });
 await env.cleanup();
 
-console.log(`Seeded ${games.length} games and ${strategies.length} strategies.`);
+console.log(`Seeded ${games.length} games and their strategy pages.`);
 console.log(`Admin login: ${TEST_ADMIN.email} (password in scripts/seed-emulators.ts)`);

@@ -23,13 +23,15 @@ afterAll(async () => {
   await env.cleanup();
 });
 
+// "pub" and "draft" are both game ids and strategy ids (one strategy per game).
 beforeEach(async () => {
   await env.clearFirestore();
   await env.withSecurityRulesDisabled(async (ctx) => {
     const db = ctx.firestore();
-    await setDoc(doc(db, "games/g1"), { name: "Medieval Madness", nameLower: "medieval madness" });
-    await setDoc(doc(db, "strategies/pub"), strategyData({ status: "published" }));
-    await setDoc(doc(db, "strategies/draft"), strategyData({ status: "draft" }));
+    await setDoc(doc(db, "games/pub"), { name: "Medieval Madness", nameLower: "medieval madness" });
+    await setDoc(doc(db, "games/draft"), { name: "Godzilla", nameLower: "godzilla" });
+    await setDoc(doc(db, "strategies/pub"), strategyData("pub", { status: "published" }));
+    await setDoc(doc(db, "strategies/draft"), strategyData("draft", { status: "draft" }));
     await setDoc(doc(db, "strategies/draft/notes/n1"), { text: "secret note", photoIds: [] });
   });
 });
@@ -40,7 +42,7 @@ const adminDb = () => env.authenticatedContext(ADMIN_UID).firestore();
 
 describe("public visitors", () => {
   it("can read games", async () => {
-    await assertSucceeds(getDoc(doc(publicDb(), "games/g1")));
+    await assertSucceeds(getDoc(doc(publicDb(), "games/pub")));
   });
 
   it("can read a published strategy", async () => {
@@ -58,12 +60,6 @@ describe("public visitors", () => {
     await assertFails(getDocs(query(strategies, where("status", "==", "draft"))));
   });
 
-  it("can list a game's published strategies (game page query)", async () => {
-    const strategies = collection(publicDb(), "strategies");
-    await assertSucceeds(getDocs(query(strategies, where("gameId", "==", "g1"), where("status", "==", "published"))));
-    await assertFails(getDocs(query(strategies, where("gameId", "==", "g1"))));
-  });
-
   it("cannot read notes, even on published strategies", async () => {
     await assertFails(getDoc(doc(publicDb(), "strategies/draft/notes/n1")));
     await assertFails(getDocs(collection(publicDb(), "strategies/pub/notes")));
@@ -72,9 +68,9 @@ describe("public visitors", () => {
   it("cannot write anything", async () => {
     const db = publicDb();
     await assertFails(setDoc(doc(db, "games/new"), { name: "Hacked", nameLower: "hacked" }));
-    await assertFails(updateDoc(doc(db, "strategies/pub"), { title: "Hacked" }));
+    await assertFails(updateDoc(doc(db, "strategies/pub"), { body: "Hacked" }));
     await assertFails(deleteDoc(doc(db, "strategies/pub")));
-    await assertFails(setDoc(doc(db, "strategies/x"), strategyData()));
+    await assertFails(setDoc(doc(db, "strategies/x"), strategyData("x")));
   });
 });
 
@@ -96,10 +92,10 @@ describe("admin", () => {
     await assertSucceeds(getDocs(collection(db, "strategies")));
   });
 
-  it("can create, update, publish, and delete strategies", async () => {
+  it("can create, update, publish, and delete a game's strategy", async () => {
     const db = adminDb();
-    await assertSucceeds(setDoc(doc(db, "strategies/new"), strategyData()));
-    await assertSucceeds(updateDoc(doc(db, "strategies/new"), { title: "Better title" }));
+    await assertSucceeds(setDoc(doc(db, "strategies/new"), strategyData("new")));
+    await assertSucceeds(updateDoc(doc(db, "strategies/new"), { body: "Better text" }));
     await assertSucceeds(updateDoc(doc(db, "strategies/new"), { status: "published", publishedAt: new Date() }));
     await assertSucceeds(deleteDoc(doc(db, "strategies/new")));
   });
@@ -117,16 +113,18 @@ describe("admin", () => {
 });
 
 describe("validation (even for admin)", () => {
+  it("allows only one strategy per game (id must match gameId)", async () => {
+    const db = adminDb();
+    await assertFails(setDoc(doc(db, "strategies/second-one"), strategyData("pub")));
+    await assertFails(updateDoc(doc(db, "strategies/pub"), { gameId: "draft" }));
+  });
+
   it("rejects unknown strategy status", async () => {
-    await assertFails(setDoc(doc(adminDb(), "strategies/bad"), strategyData({ status: "secret" })));
+    await assertFails(setDoc(doc(adminDb(), "strategies/bad"), strategyData("bad", { status: "secret" })));
   });
 
   it("rejects unexpected strategy fields", async () => {
-    await assertFails(setDoc(doc(adminDb(), "strategies/bad"), strategyData({ isAdmin: true })));
-  });
-
-  it("rejects strategies without a game", async () => {
-    await assertFails(setDoc(doc(adminDb(), "strategies/bad"), strategyData({ gameId: "" })));
+    await assertFails(setDoc(doc(adminDb(), "strategies/bad"), strategyData("bad", { isAdmin: true })));
   });
 
   it("rejects games with no name or a silly year", async () => {

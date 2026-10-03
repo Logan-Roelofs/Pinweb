@@ -26,13 +26,17 @@ export interface Game {
   updatedAt: Timestamp | null;
 }
 
+/**
+ * Each game has exactly one strategy page, stored at strategies/{gameId}
+ * (same id as the game; the security rules enforce this). It's kept apart
+ * from the game doc so drafts can stay private while game info is public.
+ */
 export interface Strategy {
+  /** Same as gameId. */
   id: string;
   gameId: string;
   /** Copy of the game's name, so lists and search don't need a second lookup. */
   gameName: string;
-  title: string;
-  titleLower: string;
   /** TipTap document, JSON-encoded. Empty string = no body yet. */
   body: string;
   /** Plain-text preview of the body, for cards and search. */

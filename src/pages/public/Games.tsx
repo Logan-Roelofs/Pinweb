@@ -1,21 +1,43 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useMemo } from "react";
+import { useSearchParams } from "react-router";
+import GameCard from "../../components/GameCard";
 import LoadState from "../../components/LoadState";
-import { getAllGames, getAllPublished } from "../../data/public";
+import TagChip from "../../components/TagChip";
+import { getPublishedGamePages } from "../../data/public";
 import { useLoad, useTitle } from "../../hooks/useLoad";
 
+/**
+ * All published games, A→Z, with search (name or manufacturer) and a tag
+ * filter. Firestore has no full-text search, so this loads every published
+ * page once and filters in the browser. Fast and simple at this site's size.
+ */
 export default function Games() {
   useTitle("Games");
-  const [filter, setFilter] = useState("");
-  // Only list games that have at least one published strategy.
-  const state = useLoad(async () => {
-    const [games, strategies] = await Promise.all([getAllGames(), getAllPublished()]);
-    const counts = new Map<string, number>();
-    strategies.forEach((s) => counts.set(s.gameId, (counts.get(s.gameId) ?? 0) + 1));
-    return games.filter((g) => counts.has(g.id)).map((g) => ({ ...g, count: counts.get(g.id)! }));
-  }, []);
+  const [params, setParams] = useSearchParams();
+  const q = params.get("q") ?? "";
+  const tag = params.get("tag") ?? "";
+  const state = useLoad(
+    () => getPublishedGamePages().then((pages) => pages.sort((a, b) => a.game.nameLower.localeCompare(b.game.nameLower))),
+    [],
+  );
 
-  const q = filter.trim().toLowerCase();
+  const update = (key: string, value: string) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true });
+  };
+
+  const all = useMemo(() => (state.status === "ready" ? state.data : []), [state]);
+  const allTags = useMemo(() => [...new Set(all.flatMap((p) => p.strategy.tags))].sort(), [all]);
+  const results = useMemo(() => {
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    return all.filter(({ game, strategy }) => {
+      if (tag && !strategy.tags.includes(tag)) return false;
+      const haystack = `${game.nameLower} ${(game.manufacturer ?? "").toLowerCase()} ${game.year ?? ""}`;
+      return words.every((w) => haystack.includes(w));
+    });
+  }, [all, q, tag]);
 
   return (
     <div className="space-y-6">
@@ -23,46 +45,43 @@ export default function Games() {
       <input
         className="input"
         type="search"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-        placeholder="Filter games…"
-        aria-label="Filter games"
+        value={q}
+        onChange={(e) => update("q", e.target.value)}
+        placeholder="Search by game or manufacturer…"
+        aria-label="Search games"
       />
+
+      {allTags.length > 0 && (
+        <div className="flex flex-wrap gap-2" aria-label="Filter by tag">
+          {allTags.map((t) => (
+            <TagChip key={t} tag={t} active={t === tag} />
+          ))}
+        </div>
+      )}
+
       <LoadState state={state}>
-        {(games) => {
-          const shown = games.filter(
-            (g) => !q || g.nameLower.includes(q) || g.manufacturer?.toLowerCase().includes(q),
-          );
-          if (games.length === 0) return <p className="card p-6 text-center text-muted">No games with published strategies yet.</p>;
-          if (shown.length === 0) return <p className="text-muted">No games match “{filter}”.</p>;
-          return (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {shown.map((g) => (
-                <li key={g.id}>
-                  <Link
-                    to={`/games/${g.id}`}
-                    className="card flex h-full overflow-hidden text-text no-underline transition hover:border-matrix-dim hover:no-underline hover:shadow-glow"
-                  >
-                    {g.photo ? (
-                      <img src={g.photo.thumbUrl} alt="" loading="lazy" className="w-28 shrink-0 bg-surface-2 object-cover" />
-                    ) : (
-                      <div className="flex w-28 shrink-0 items-center justify-center bg-surface-2 font-mono text-3xl text-matrix-dim">
-                        ◉
-                      </div>
-                    )}
-                    <div className="flex min-w-0 flex-col justify-center gap-1 p-4">
-                      <span className="text-lg font-semibold">{g.name}</span>
-                      <span className="text-sm text-muted">{[g.manufacturer, g.year].filter(Boolean).join(" · ")}</span>
-                      <span className="font-mono text-xs text-matrix">
-                        {g.count} strateg{g.count === 1 ? "y" : "ies"}
-                      </span>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          );
-        }}
+        {() => (
+          <>
+            {(q || tag) && (
+              <p className="font-mono text-xs text-muted">
+                &gt; {results.length} game{results.length === 1 ? "" : "s"}
+                {tag && ` tagged #${tag}`}
+                {q && ` matching “${q}”`}
+              </p>
+            )}
+            {all.length === 0 ? (
+              <p className="card p-6 text-center text-muted">No games published yet. Check back soon!</p>
+            ) : results.length === 0 ? (
+              <p className="card p-6 text-center text-muted">Nothing found. Try fewer words or a different tag.</p>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {results.map((p) => (
+                  <GameCard key={p.game.id} page={p} />
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </LoadState>
     </div>
   );

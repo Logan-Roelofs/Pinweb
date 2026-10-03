@@ -1,26 +1,16 @@
-import {
-  arrayUnion,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-  writeBatch,
-} from "firebase/firestore";
+import { arrayUnion, collection, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { deletePhotoFiles } from "../lib/photos";
 import type { Photo, Strategy, StrategyStatus } from "../lib/types";
 import { trackWrite } from "../lib/writes";
 import { fromSnap } from "./convert";
 
+/**
+ * Strategy pages live at strategies/{gameId}, one per game. They're created
+ * and deleted together with their game (see games.ts).
+ */
 const strategies = collection(db, "strategies");
 
-/** Admin only: live list of every strategy (drafts included), newest edits first. */
+/** Admin only: live list of every strategy page (drafts included), newest edits first. */
 export function subscribeAllStrategies(onChange: (list: Strategy[]) => void, onError?: (err: Error) => void) {
   return onSnapshot(
     query(strategies, orderBy("updatedAt", "desc")),
@@ -29,49 +19,15 @@ export function subscribeAllStrategies(onChange: (list: Strategy[]) => void, onE
   );
 }
 
-export async function getStrategy(id: string): Promise<Strategy | null> {
-  const snap = await getDoc(doc(strategies, id));
-  return snap.exists() ? fromSnap<Strategy>(snap) : null;
+/** Live updates for one game's strategy page. */
+export function subscribeStrategy(gameId: string, onChange: (s: Strategy | null) => void) {
+  return onSnapshot(doc(strategies, gameId), (snap) => onChange(snap.exists() ? fromSnap<Strategy>(snap) : null));
 }
 
-/** Live updates for one strategy. */
-export function subscribeStrategy(id: string, onChange: (s: Strategy | null) => void) {
-  return onSnapshot(doc(strategies, id), (snap) => onChange(snap.exists() ? fromSnap<Strategy>(snap) : null));
-}
+export type StrategyEdits = Partial<Pick<Strategy, "body" | "excerpt" | "tags">>;
 
-/** Creates a draft and returns its id immediately (works offline). */
-export function createStrategy(input: { gameId: string; gameName: string; title: string }): string {
-  const ref = doc(strategies);
-  const title = input.title.trim().slice(0, 200);
-  trackWrite(
-    setDoc(ref, {
-      gameId: input.gameId,
-      gameName: input.gameName,
-      title,
-      titleLower: title.toLowerCase(),
-      body: "",
-      excerpt: "",
-      photos: [],
-      tags: [],
-      status: "draft",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      publishedAt: null,
-    }),
-    "new strategy",
-  );
-  return ref.id;
-}
-
-export type StrategyEdits = Partial<Pick<Strategy, "gameId" | "gameName" | "title" | "body" | "excerpt" | "tags">>;
-
-export function updateStrategy(id: string, edits: StrategyEdits): Promise<void> {
-  const data: Record<string, unknown> = { ...edits, updatedAt: serverTimestamp() };
-  if (edits.title !== undefined) {
-    data.title = edits.title.slice(0, 200);
-    data.titleLower = edits.title.trim().toLowerCase().slice(0, 200);
-  }
-  return trackWrite(updateDoc(doc(strategies, id), data), "strategy");
+export function updateStrategy(gameId: string, edits: StrategyEdits): Promise<void> {
+  return trackWrite(updateDoc(doc(strategies, gameId), { ...edits, updatedAt: serverTimestamp() }), "strategy");
 }
 
 export function setStrategyStatus(strategy: Strategy, status: StrategyStatus): Promise<void> {
@@ -86,24 +42,14 @@ export function setStrategyStatus(strategy: Strategy, status: StrategyStatus): P
   );
 }
 
-export function addStrategyPhoto(id: string, photo: Photo): Promise<void> {
+export function addStrategyPhoto(gameId: string, photo: Photo): Promise<void> {
   return trackWrite(
-    updateDoc(doc(strategies, id), { photos: arrayUnion(photo), updatedAt: serverTimestamp() }),
+    updateDoc(doc(strategies, gameId), { photos: arrayUnion(photo), updatedAt: serverTimestamp() }),
     "photo",
   );
 }
 
 /** Replaces the photo list (used for reordering and removing). */
-export function setStrategyPhotos(id: string, photos: Photo[]): Promise<void> {
-  return trackWrite(updateDoc(doc(strategies, id), { photos, updatedAt: serverTimestamp() }), "photos");
-}
-
-/** Deletes a strategy, its photos, and its notes. */
-export async function deleteStrategy(strategy: Strategy): Promise<void> {
-  await Promise.all(strategy.photos.map(deletePhotoFiles));
-  const notes = await getDocs(collection(strategies, strategy.id, "notes"));
-  const batch = writeBatch(db);
-  notes.forEach((n) => batch.delete(n.ref));
-  batch.delete(doc(strategies, strategy.id));
-  await trackWrite(batch.commit(), "strategy deletion");
+export function setStrategyPhotos(gameId: string, photos: Photo[]): Promise<void> {
+  return trackWrite(updateDoc(doc(strategies, gameId), { photos, updatedAt: serverTimestamp() }), "photos");
 }

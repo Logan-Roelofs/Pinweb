@@ -4,6 +4,8 @@ rules_version = '2';
 //   • Everyone (no login): read games, read PUBLISHED strategies.
 //   • Admin (one UID): read and write everything, including drafts and notes.
 //   • Anyone else, signed in or not: nothing else.
+//
+// Each game has exactly one strategy page: strategies/{gameId}.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -24,12 +26,12 @@ service cloud.firestore {
         && (!('photo' in d) || d.photo == null || d.photo is map);
     }
 
-    function validStrategy(d) {
-      return d.keys().hasOnly(['gameId', 'gameName', 'title', 'titleLower', 'body', 'excerpt',
-                               'photos', 'tags', 'status', 'createdAt', 'updatedAt', 'publishedAt'])
-        && d.keys().hasAll(['gameId', 'title', 'status'])
-        && d.gameId is string && d.gameId.size() > 0
-        && d.title is string && d.title.size() <= 200
+    function validStrategy(d, strategyId) {
+      return d.keys().hasOnly(['gameId', 'gameName', 'body', 'excerpt', 'photos', 'tags', 'status',
+                               'createdAt', 'updatedAt', 'publishedAt'])
+        && d.keys().hasAll(['gameId', 'status'])
+        // One strategy per game: the strategy's id must be its game's id.
+        && d.gameId == strategyId
         && d.status in ['draft', 'published']
         && optionalString(d, 'gameName', 100)
         && optionalString(d, 'excerpt', 500)
@@ -53,7 +55,7 @@ service cloud.firestore {
     match /strategies/{strategyId} {
       // Public queries must filter on status == 'published' or they are rejected.
       allow read: if isAdmin() || resource.data.status == 'published';
-      allow create, update: if isAdmin() && validStrategy(request.resource.data);
+      allow create, update: if isAdmin() && validStrategy(request.resource.data, strategyId);
       allow delete: if isAdmin();
 
       // Raw Quick Capture notes are never public, even for published strategies.

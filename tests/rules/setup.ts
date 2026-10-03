@@ -12,12 +12,11 @@ export function createTestEnv() {
   });
 }
 
-export function strategyData(overrides: Record<string, unknown> = {}) {
+/** A valid strategy for the game `gameId` (stored at strategies/{gameId}). */
+export function strategyData(gameId: string, overrides: Record<string, unknown> = {}) {
   return {
-    gameId: "g1",
+    gameId,
     gameName: "Medieval Madness",
-    title: "Castle multiball",
-    titleLower: "castle multiball",
     body: "",
     excerpt: "",
     photos: [],

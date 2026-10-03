@@ -21,8 +21,8 @@ beforeEach(async () => {
   await env.clearFirestore();
   await env.clearStorage();
   await env.withSecurityRulesDisabled(async (ctx) => {
-    await setDoc(doc(ctx.firestore(), "strategies/pub"), strategyData({ status: "published" }));
-    await setDoc(doc(ctx.firestore(), "strategies/draft"), strategyData({ status: "draft" }));
+    await setDoc(doc(ctx.firestore(), "strategies/pub"), strategyData("pub", { status: "published" }));
+    await setDoc(doc(ctx.firestore(), "strategies/draft"), strategyData("draft", { status: "draft" }));
     const storage = ctx.storage();
     await uploadBytes(ref(storage, "strategies/pub/p1.jpg"), jpeg(), asJpeg);
     await uploadBytes(ref(storage, "strategies/draft/p1.jpg"), jpeg(), asJpeg);
