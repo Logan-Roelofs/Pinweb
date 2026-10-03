@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { errorMessage } from "../../lib/writes";
+import MatrixRain from "../../components/MatrixRain";
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -23,8 +24,9 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4">
-      <form onSubmit={submit} className="card w-full max-w-sm space-y-4 p-6 shadow-glow">
+    <div className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4">
+      <MatrixRain className="opacity-30" />
+      <form onSubmit={submit} className="card relative w-full max-w-sm space-y-4 p-6 shadow-glow">
         <div>
           <p className="font-mono text-xs text-muted">&gt; authenticate</p>
           <h1 className="mt-1 text-2xl font-bold text-glow">PINWEB/admin</h1>

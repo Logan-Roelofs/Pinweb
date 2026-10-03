@@ -10,7 +10,7 @@ import {
   updateDoc,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db } from "../lib/db";
 import { deletePhotoFiles } from "../lib/photos";
 import type { Game, Photo, Strategy } from "../lib/types";
 import { trackWrite } from "../lib/writes";

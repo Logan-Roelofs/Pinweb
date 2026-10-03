@@ -4,14 +4,32 @@
     {
       "name": "pinweb-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5173
     },
     {
       "name": "pinweb-dev-emulators",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev:emulators", "--", "--port", "5174"],
+      "runtimeArgs": [
+        "run",
+        "dev:emulators",
+        "--",
+        "--port",
+        "5174"
+      ],
       "port": 5174
+    },
+    {
+      "name": "pinweb-preview-emulators",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "preview:emulators"
+      ],
+      "port": 4173
     }
   ]
 }

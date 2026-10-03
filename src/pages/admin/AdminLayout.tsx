@@ -52,7 +52,7 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
+      <header className="safe-top sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
         <div className="mx-auto grid max-w-5xl grid-cols-[1fr_auto] items-center gap-x-2 gap-y-1 px-4 py-2 sm:grid-cols-[auto_1fr_auto]">
           <Link to="/admin" className="mr-2 font-mono font-bold text-matrix no-underline text-glow hover:no-underline">
             PINWEB<span className="text-muted">/admin</span>

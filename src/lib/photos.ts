@@ -1,6 +1,6 @@
 import imageCompression from "browser-image-compression";
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { storage } from "./firebase";
+import { storage } from "./storage";
 import type { Photo } from "./types";
 
 const FULL = { maxWidthOrHeight: 2000, maxSizeMB: 1 };

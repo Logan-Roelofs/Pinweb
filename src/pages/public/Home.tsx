@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import GameCard from "../../components/GameCard";
 import LoadState from "../../components/LoadState";
+import MatrixRain from "../../components/MatrixRain";
 import TagChip from "../../components/TagChip";
 import { getPublishedGamePages } from "../../data/public";
 import { useLoad, useTitle } from "../../hooks/useLoad";
@@ -14,6 +15,10 @@ export default function Home() {
   return (
     <div className="space-y-12">
       <section className="card relative overflow-hidden p-6 shadow-glow sm:p-10">
+        {/* Rain fades out toward the left so it never sits behind the text; on
+            narrow screens the text fills the width, so it's left out there. */}
+        <MatrixRain className="hidden opacity-40 [mask-image:linear-gradient(to_left,black_5%,transparent_45%)] sm:block" />
+        <div className="relative">
         <p className="font-mono text-sm text-muted">&gt; booting pinweb...</p>
         <h1 className="mt-3 text-3xl font-bold text-glow sm:text-5xl">Pinball strategy, decoded.</h1>
         <p className="mt-4 max-w-prose text-lg leading-relaxed">
@@ -23,6 +28,7 @@ export default function Home() {
           <Link to="/games" className="btn btn-primary">
             Browse all games
           </Link>
+        </div>
         </div>
       </section>
 

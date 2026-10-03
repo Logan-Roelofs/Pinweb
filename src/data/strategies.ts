@@ -1,5 +1,5 @@
 import { arrayUnion, collection, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db } from "../lib/db";
 import type { Photo, Strategy, StrategyStatus } from "../lib/types";
 import { trackWrite } from "../lib/writes";
 import { fromSnap } from "./convert";

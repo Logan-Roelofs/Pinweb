@@ -1,15 +1,28 @@
-import { collection, doc, getDoc, getDocs, orderBy, query, where } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  where,
+  type DocumentSnapshot,
+} from "firebase/firestore/lite";
+import { dbLite as db } from "../lib/dbLite";
 import type { Game, Strategy } from "../lib/types";
-import { fromSnap } from "./convert";
 
 /**
- * Reads for the public site. Every strategy query filters on
- * status == "published"; the security rules reject any that don't.
+ * Reads for the public site, using the small "lite" Firestore. Every
+ * strategy query filters on status == "published"; the security rules reject
+ * any that don't.
  */
 const strategies = collection(db, "strategies");
 const published = where("status", "==", "published");
 const newestFirst = orderBy("updatedAt", "desc");
+
+function fromSnap<T>(snap: DocumentSnapshot): T {
+  return { id: snap.id, ...snap.data() } as T;
+}
 
 /** A game with its published strategy page. */
 export interface GamePage {

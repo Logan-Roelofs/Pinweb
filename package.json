@@ -11,7 +11,8 @@
     "typecheck": "tsc",
     "emulators": "firebase emulators:start --project demo-pinweb",
     "seed": "node scripts/seed-emulators.ts",
-    "test:rules": "firebase emulators:exec --only firestore,storage --project demo-pinweb \"vitest run\""
+    "test:rules": "firebase emulators:exec --only firestore,storage --project demo-pinweb \"vitest run\"",
+    "preview:emulators": "vite build --mode emulators && vite preview --mode emulators --port 4173"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.8.0",
@@ -38,6 +39,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.2",
+    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.3"
   }
 }

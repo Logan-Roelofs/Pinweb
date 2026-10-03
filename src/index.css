@@ -113,6 +113,21 @@
   }
 }
 
+/* Barely-there CRT scanlines over the whole page. Purely decorative. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 3px);
+}
+
+/* Installed iPhone app draws under the status bar: keep headers clear of it. */
+@utility safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
 @utility text-glow {
   text-shadow: 0 0 10px rgb(0 255 102 / 0.45), 0 0 2px rgb(0 255 102 / 0.7);
 }

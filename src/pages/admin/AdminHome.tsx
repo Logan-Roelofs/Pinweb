@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
+import InstallCard from "../../components/InstallCard";
 import { useAllStrategies, useGames } from "../../hooks/useLive";
 import { allBackups } from "../../lib/noteBackup";
 import GameRow from "./GameRow";
@@ -23,6 +24,8 @@ export default function AdminHome() {
         <span className="font-mono text-3xl font-bold text-matrix text-glow">⚡ Quick Capture</span>
         <span className="text-sm text-text">Photos + notes, right at the machine</span>
       </Link>
+
+      <InstallCard />
 
       {unassigned && (
         <Link to={`/admin/capture?note=${unassigned.noteId}`} className="card block border-draft/50 p-4 no-underline hover:no-underline">

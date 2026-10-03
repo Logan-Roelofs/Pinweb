@@ -1,7 +1,8 @@
 import { createStore, del, entries, get, set } from "idb-keyval";
 import { arrayUnion, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { db, storage } from "./firebase";
+import { db } from "./db";
+import { storage } from "./storage";
 import { compressImage, newPhotoId } from "./photos";
 import type { Photo } from "./types";
 

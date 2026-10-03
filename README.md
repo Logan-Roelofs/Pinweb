@@ -35,6 +35,8 @@ npm run test:rules    # starts the emulators, runs the security-rules tests, sto
 npm run build         # type-checks and builds to dist/
 ```
 
+To try the **installable/offline app** locally: with the emulators running and seeded, run `npm run preview:emulators` and open http://localhost:4173. The offline service worker only runs in production builds, not in `npm run dev`.
+
 ---
 
 ## Firebase setup (one time)
@@ -161,7 +163,10 @@ firestore.indexes.json         Firestore composite indexes
 tests/rules/                   Security-rules tests (run against the emulators)
 scripts/seed-emulators.ts      Test admin + sample data for the local emulators
 src/
-  lib/firebase.ts              Firebase setup (offline cache, emulator switch)
+  lib/firebase.ts              Firebase app + config (services split per page below)
+  lib/auth.ts, db.ts,          Auth (loaded in background), full offline Firestore (admin),
+    dbLite.ts, storage.ts        small read-only Firestore (public), photo uploads (admin)
+  lib/uploadQueue.ts           On-device photo upload queue (IndexedDB)
   lib/admin.ts                 Admin UID (the UI's copy; the rules enforce it)
   lib/photos.ts                Compress + upload images
   lib/richText.ts              Allowed text formatting (editor + public pages)
@@ -194,7 +199,19 @@ Each capture visit becomes its own timestamped note on that game. In the game's 
 | Uploading while the app is closed | **No.** Phones don't let websites upload in the background. Open the app with signal and the queue continues by itself (also on reconnect, and every 30 seconds). |
 | Closing the app while the camera is still open | **No.** The photo never reached the app. |
 | Signing out with photos waiting | They stay on the phone but can't upload until you sign back in (you'll get a warning). |
-| iPhone storage clean-up | Installing the site to your home screen (Phase 5) protects its storage; the app also asks the browser to keep it. A plain Safari tab unused for weeks may be cleared by iOS. |
+| iPhone storage clean-up | Installing the site to your home screen (see below) protects its storage; the app also asks the browser to keep it. A plain Safari tab unused for weeks may be cleared by iOS. |
+
+## Install it on your phone
+
+The site is a PWA (progressive web app): it can be added to your home screen and then opens full-screen like an app, even with no signal (the app itself is stored on the phone; content you've already viewed is available offline).
+
+- **iPhone (Safari):** open the site, tap **Share** (square with an up arrow), then **Add to Home Screen**. Note: the home-screen app has its own storage, separate from Safari, so **sign in once inside the installed app** at `/admin`, and use Quick Capture from there.
+- **Android (Chrome):** open the site and tap **Install** on the card on the admin home screen, or use the ⋮ menu → **Install app**.
+- Long-press the icon for a **Quick Capture** shortcut (Android).
+
+After a deploy, the app shows **"new version available"** with a **Reload** button. It never reloads by itself, so an update can't interrupt a capture.
+
+Icons are generated from `public/icon.svg`. After editing it, run `npx @vite-pwa/assets-generator` (settings in `pwa-assets.config.mjs`).
 
 ## Data model
 

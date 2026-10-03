@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import type { User } from "firebase/auth";
 import { ADMIN_UID } from "../lib/admin";
 
 interface AuthState {
@@ -13,18 +12,35 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+/** Firebase Auth is loaded in the background, so the public pages show without waiting for it. */
+const loadAuth = () => import("../lib/auth");
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null | undefined>(undefined);
 
-  useEffect(() => onAuthStateChanged(auth, setUser), []);
+  useEffect(() => {
+    let unsubscribe = () => {};
+    let cancelled = false;
+    loadAuth().then(({ auth, onAuthStateChanged }) => {
+      if (!cancelled) unsubscribe = onAuthStateChanged(auth, setUser);
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
 
   const value: AuthState = {
     user,
     isAdmin: user?.uid === ADMIN_UID,
     signIn: async (email, password) => {
+      const { auth, signInWithEmailAndPassword } = await loadAuth();
       await signInWithEmailAndPassword(auth, email.trim(), password);
     },
-    signOut: () => signOut(auth),
+    signOut: async () => {
+      const { auth, signOut } = await loadAuth();
+      await signOut(auth);
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

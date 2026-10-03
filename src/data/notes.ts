@@ -10,7 +10,7 @@ import {
   updateDoc,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db } from "../lib/db";
 import type { Note } from "../lib/types";
 import { trackWrite } from "../lib/writes";
 import { fromSnap } from "./convert";
