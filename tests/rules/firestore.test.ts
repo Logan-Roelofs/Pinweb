@@ -58,6 +58,12 @@ describe("public visitors", () => {
     await assertFails(getDocs(query(strategies, where("status", "==", "draft"))));
   });
 
+  it("can list a game's published strategies (game page query)", async () => {
+    const strategies = collection(publicDb(), "strategies");
+    await assertSucceeds(getDocs(query(strategies, where("gameId", "==", "g1"), where("status", "==", "published"))));
+    await assertFails(getDocs(query(strategies, where("gameId", "==", "g1"))));
+  });
+
   it("cannot read notes, even on published strategies", async () => {
     await assertFails(getDoc(doc(publicDb(), "strategies/draft/notes/n1")));
     await assertFails(getDocs(collection(publicDb(), "strategies/pub/notes")));

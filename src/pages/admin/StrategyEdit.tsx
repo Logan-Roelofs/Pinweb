@@ -96,6 +96,9 @@ function Editor({ initial }: { initial: Strategy }) {
         <span className="flex-1 text-sm text-muted">
           {published ? `Visible to everyone · first published ${formatDate(live.publishedAt)}` : "Only you can see this"}
         </span>
+        <Link to={`/strategies/${live.id}`} className="btn">
+          {published ? "View" : "Preview"}
+        </Link>
         <button
           className={`btn ${published ? "" : "btn-primary"}`}
           onClick={() => setStrategyStatus(live, published ? "draft" : "published")}

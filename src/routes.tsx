@@ -2,6 +2,10 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { createBrowserRouter } from "react-router";
 import Layout from "./components/Layout";
 import Home from "./pages/public/Home";
+import Games from "./pages/public/Games";
+import GameDetail from "./pages/public/GameDetail";
+import StrategyPage from "./pages/public/StrategyPage";
+import Search from "./pages/public/Search";
 import NotFound from "./pages/public/NotFound";
 
 // Admin pages (and the heavy text editor) load only when /admin is visited.
@@ -21,6 +25,10 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <Home /> },
+      { path: "games", element: <Games /> },
+      { path: "games/:id", element: <GameDetail /> },
+      { path: "strategies/:id", element: <StrategyPage /> },
+      { path: "search", element: <Search /> },
       { path: "*", element: <NotFound /> },
     ],
   },

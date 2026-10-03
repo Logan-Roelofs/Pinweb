@@ -88,7 +88,7 @@ await env.withSecurityRulesDisabled(async (ctx) => {
       ...data,
       gameName: game.name,
       titleLower: data.title.toLowerCase(),
-      excerpt: "",
+      excerpt: [...data.body.matchAll(/"text":"([^"]*)"/g)].map((m) => m[1]).join(" "),
       photos: [],
       createdAt: ago(days + 1),
       updatedAt: ago(days),
