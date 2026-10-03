@@ -201,6 +201,12 @@ Each capture visit becomes its own timestamped note on that game. In the game's 
 | Signing out with photos waiting | They stay on the phone but can't upload until you sign back in (you'll get a warning). |
 | iPhone storage clean-up | Installing the site to your home screen (see below) protects its storage; the app also asks the browser to keep it. A plain Safari tab unused for weeks may be cleared by iOS. |
 
+## Photo rows inside the text
+
+In a game's editor, put the cursor where you want photos (e.g. right under an H2 section), tap **▦ Photos** in the toolbar, and tap the photos in the order they should appear. The row appears in the text as a block: **Edit** changes its photos, **✕** removes it, and **⠿** drags it elsewhere. Photos must be uploaded to the game first (Photos section or Quick Capture).
+
+On the public page, a row is a side-scrolling strip; tapping a photo opens it full screen and swipes through that row only. Photos placed in rows aren't repeated in the gallery at the bottom (which becomes "More photos"). **↓ Add to strategy** on a capture note brings the note's photos along as a row.
+
 ## Install it on your phone
 
 The site is a PWA (progressive web app): it can be added to your home screen and then opens full-screen like an app, even with no signal (the app itself is stored on the phone; content you've already viewed is available offline).

@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react";
 import { parseBody, richTextExtensions } from "../lib/richText";
+import PhotoPicker from "./editor/PhotoPicker";
+import { usePagePhotos } from "./editor/PhotosContext";
 
 interface Props {
   /** Initial body (JSON string). Later changes to this prop are ignored. */
@@ -39,6 +41,8 @@ export default function RichTextEditor({ initialBody, onChange, onReady }: Props
 }
 
 function Toolbar({ editor }: { editor: Editor }) {
+  const photos = usePagePhotos();
+  const [picking, setPicking] = useState(false);
   const state = useEditorState({
     editor,
     selector: ({ editor }) => ({
@@ -63,12 +67,23 @@ function Toolbar({ editor }: { editor: Editor }) {
     { label: "•", title: "Bullet list", active: state.bullet, run: () => chain().toggleBulletList().run() },
     { label: "1.", title: "Numbered list", active: state.ordered, run: () => chain().toggleOrderedList().run() },
     { label: "❝", title: "Quote", active: state.quote, run: () => chain().toggleBlockquote().run() },
+    { label: "▦ Photos", title: "Insert a photo row here", run: () => setPicking(true) },
     { label: "↶", title: "Undo", disabled: !state.canUndo, run: () => chain().undo().run() },
     { label: "↷", title: "Redo", disabled: !state.canRedo, run: () => chain().redo().run() },
   ];
 
   return (
     <div className="sticky top-0 z-10 flex flex-wrap gap-1 border-b border-line bg-surface-2 p-2">
+      {picking && (
+        <PhotoPicker
+          photos={photos}
+          onCancel={() => setPicking(false)}
+          onDone={(photoIds) => {
+            chain().insertContent({ type: "photoRow", attrs: { photoIds } }).run();
+            setPicking(false);
+          }}
+        />
+      )}
       {buttons.map((b) => (
         <button
           key={b.title}

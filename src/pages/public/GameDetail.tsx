@@ -9,6 +9,7 @@ import { getVisibleGamePage } from "../../data/public";
 import { useAuth } from "../../hooks/useAuth";
 import { useLoad, useTitle } from "../../hooks/useLoad";
 import { formatDate } from "../../lib/format";
+import { photoIdsInBody } from "../../lib/richTextDoc";
 import NotFound from "./NotFound";
 
 /** A game's strategy page. */
@@ -25,6 +26,9 @@ export default function GameDetail() {
       {(page) => {
         if (!page) return <NotFound />;
         const { game, strategy: s } = page;
+        // Photos already shown in rows inside the text aren't repeated at the bottom.
+        const inText = photoIdsInBody(s.body);
+        const morePhotos = s.photos.filter((p) => !inText.has(p.id));
         return (
           <article className="mx-auto max-w-3xl space-y-8">
             {s.status !== "published" && (
@@ -71,17 +75,17 @@ export default function GameDetail() {
             </header>
 
             {s.body ? (
-              <RichTextView body={s.body} />
+              <RichTextView body={s.body} photos={s.photos} />
             ) : (
               <p className="text-muted italic">Strategy coming soon.</p>
             )}
 
-            {s.photos.length > 0 && (
+            {morePhotos.length > 0 && (
               <section>
                 <h2 className="mb-3 font-mono text-sm tracking-wide text-muted uppercase">
-                  Photos <span className="normal-case">· tap to enlarge</span>
+                  {inText.size > 0 ? "More photos" : "Photos"} <span className="normal-case">· tap to enlarge</span>
                 </h2>
-                <PhotoGallery photos={s.photos} />
+                <PhotoGallery photos={morePhotos} />
               </section>
             )}
 

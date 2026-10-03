@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 import NotesPanel from "../../components/NotesPanel";
+import { PhotosContext } from "../../components/editor/PhotosContext";
 import PhotoManager from "../../components/PhotoManager";
 import RichTextEditor from "../../components/RichTextEditor";
 import StatusBadge from "../../components/StatusBadge";
@@ -196,23 +197,27 @@ function Editor({
 
       <div>
         <span className="label">Strategy</span>
-        <RichTextEditor
-          initialBody={strategy?.body ?? ""}
-          onChange={(json, plain) => setBody({ json, excerpt: makeExcerpt(plain) })}
-          onReady={(e) => (editorRef.current = e)}
-        />
+        <PhotosContext.Provider value={strategy?.photos ?? []}>
+          <RichTextEditor
+            initialBody={strategy?.body ?? ""}
+            onChange={(json, plain) => setBody({ json, excerpt: makeExcerpt(plain) })}
+            onReady={(e) => (editorRef.current = e)}
+          />
+        </PhotosContext.Provider>
       </div>
 
       {exists && (
         <NotesPanel
           gameId={id}
           photos={strategy?.photos ?? []}
-          onInsert={(noteText) => {
-            const paragraphs = noteText
+          onInsert={(noteText, photoIds) => {
+            const content: object[] = noteText
               .split(/\n+/)
               .filter((line) => line.trim())
               .map((line) => ({ type: "paragraph", content: [{ type: "text", text: line }] }));
-            editorRef.current?.chain().focus("end").insertContent(paragraphs).run();
+            // The note's photos come along as a photo row right under its text.
+            if (photoIds.length > 0) content.push({ type: "photoRow", attrs: { photoIds } });
+            editorRef.current?.chain().focus("end").insertContent(content).run();
           }}
         />
       )}

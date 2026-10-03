@@ -1,4 +1,5 @@
 import StarterKit from "@tiptap/starter-kit";
+import { PhotoRowNode } from "../components/editor/PhotoRowNode";
 
 export { parseBody, makeExcerpt } from "./richTextDoc";
 
@@ -13,4 +14,5 @@ export const richTextExtensions = [
     codeBlock: false,
     link: { openOnClick: false, autolink: true, protocols: ["http", "https"] },
   }),
+  PhotoRowNode,
 ];

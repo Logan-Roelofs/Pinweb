@@ -7,8 +7,8 @@ import type { Note, Photo } from "../lib/types";
 interface Props {
   gameId: string;
   photos: Photo[];
-  /** Adds the note's text to the end of the strategy. */
-  onInsert: (text: string) => void;
+  /** Adds the note's text (and its photos, as a photo row) to the end of the strategy. */
+  onInsert: (text: string, photoIds: string[]) => void;
 }
 
 /** Quick Capture notes for a game, to fold into the strategy text over time. */
@@ -49,11 +49,11 @@ export default function NotesPanel({ gameId, photos, onInsert }: Props) {
                   </div>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {n.text.trim() && (
+                  {(n.text.trim() || notePhotos.length > 0) && (
                     <button
                       className="btn btn-sm"
                       onClick={() => {
-                        onInsert(n.text);
+                        onInsert(n.text, notePhotos.map((p) => p.id));
                         markNoteMerged(gameId, n.id);
                       }}
                     >
