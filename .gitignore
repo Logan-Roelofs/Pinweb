@@ -1,0 +1,26 @@
+node_modules/
+dist/
+*.local
+
+# Env files hold project config; only the example is committed
+.env
+.env.*
+!.env.example
+
+# Firebase
+.firebase/
+*-debug.log
+firebase-debug.*.log
+ui-debug.log
+emulator-data/
+
+# Never commit service account keys
+*service-account*.json
+*-firebase-adminsdk-*.json
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
