@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router";
-import BobsGuideSuggestions from "../../components/BobsGuideSuggestions";
+import GuidesElsewhere from "../../components/GuidesElsewhere";
 import GameCard from "../../components/GameCard";
 import LoadState from "../../components/LoadState";
 import { getPublishedGamePages } from "../../data/public";
@@ -56,17 +56,17 @@ export default function Games() {
                 &gt; {results.length} game{results.length === 1 ? "" : "s"} matching “{q}”
               </p>
             )}
-            {all.length === 0 ? (
-              <p className="card p-6 text-center text-muted">No games published yet. Check back soon!</p>
-            ) : results.length === 0 ? (
-              <BobsGuideSuggestions query={q} />
-            ) : (
+            {results.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {results.map((p) => (
                   <GameCard key={p.game.id} page={p} />
                 ))}
               </div>
+            ) : (
+              !q && <p className="card p-6 text-center text-muted">No games published yet. Check back soon!</p>
             )}
+            {/* Any search also checks the other guide sites, so this is one place to look. */}
+            {q.trim() && <GuidesElsewhere query={q.trim()} foundHere={results.length > 0} />}
           </>
         )}
       </LoadState>

@@ -219,9 +219,15 @@ Newer machines may not be in the database yet. Backglass art belongs to the mach
 
 Each game page shows an **Elsewhere** row: PinTips, PinVideos, Match Play, YouTube, OPDB, IPDB, and the flyer archive, all opening in new tabs. Most of these need to know exactly which machine the page is about, so in the game editor's Details section use **🔗 Link machine**: it searches the Open Pinball Database by name, you pick the exact maker and year (e.g. the 1997 Williams original rather than a remake), and the IPDB number is filled in automatically when it can be found. Until a game is linked, only the YouTube search link shows.
 
-## Games not on the site: Bob's Guide links
+## Searching other guide sites
 
-When a search on the Games page finds nothing, it suggests [Bob's Guide to Classic Pinball Machines](https://rules.silverballmania.com/) instead: the name is looked up in the Open Pinball Database (OPDB), and matching classic machines (1989 or earlier, Bob's Guide's era) are listed with direct links to their Bob's Guide pages, opening in a new tab. An **Open Bob's Guide search ↗** link is always there too (their search page can't be pre-filled from a link, so type the name there).
+Every search on the Games page also checks three other strategy sites, so it's one place to look for any machine. Your own games show first; the others appear under **Also elsewhere** (or **Guides elsewhere** when the game isn't on this site yet), each opening in a new tab:
+
+- [Bob's Guide to Classic Pinball Machines](https://rules.silverballmania.com/): classic machines only (1989 or earlier; newer ones are empty placeholders there).
+- [The Pinball Primer](https://pinballprimer.github.io/gamelist.html): matched by OPDB game group, so one tutorial covers a game and its special editions.
+- [JLP's Pinball Cards](https://pinballcards.net/): matched by name and year (remakes match their own year, e.g. the 2017 Attack from Mars remake).
+
+How: the typed name is looked up in the Open Pinball Database (OPDB), then checked against each site (Pinball Primer's game list and Pinball Cards' sitemap are downloaded once per visit). "Browse them yourself" links to each site are always shown too.
 
 ## Install it on your phone
 
