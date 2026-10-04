@@ -37,8 +37,8 @@ export default function GameDetail() {
               </p>
             )}
 
-            <Link to="/games" className="font-mono text-sm">
-              ← All games
+            <Link to="/" className="font-mono text-sm">
+              ← All guides
             </Link>
 
             <header className="flex flex-col gap-5 sm:flex-row sm:items-center">

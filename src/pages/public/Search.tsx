@@ -7,12 +7,12 @@ import { getPublishedGamePages } from "../../data/public";
 import { useLoad, useTitle } from "../../hooks/useLoad";
 
 /**
- * All published games, A→Z, with search (name, manufacturer, or year).
- * Firestore has no full-text search, so this loads every published page once
- * and filters in the browser. Fast and simple at this site's size.
+ * Search this site's guides (by game, manufacturer, or year) and, for any
+ * search, the other guide sites too. Firestore has no full-text search, so
+ * this loads every published page once and filters in the browser.
  */
-export default function Games() {
-  useTitle("Games");
+export default function Search() {
+  useTitle("Search");
   const [params, setParams] = useSearchParams();
   const q = params.get("q") ?? "";
   const state = useLoad(
@@ -30,6 +30,7 @@ export default function Games() {
   const all = useMemo(() => (state.status === "ready" ? state.data : []), [state]);
   const results = useMemo(() => {
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (words.length === 0) return [];
     return all.filter(({ game }) => {
       const haystack = `${game.nameLower} ${(game.manufacturer ?? "").toLowerCase()} ${game.year ?? ""}`;
       return words.every((w) => haystack.includes(w));
@@ -38,38 +39,42 @@ export default function Games() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-glow">Games</h1>
+      <h1 className="text-3xl font-bold text-glow">Search</h1>
       <input
         className="input"
         type="search"
         value={q}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search by game, manufacturer, or year…"
-        aria-label="Search games"
+        placeholder="Game, manufacturer, or year…"
+        aria-label="Search guides"
+        autoFocus
       />
 
-      <LoadState state={state}>
-        {() => (
-          <>
-            {q && (
-              <p className="font-mono text-xs text-muted">
-                &gt; {results.length} game{results.length === 1 ? "" : "s"} matching “{q}”
-              </p>
-            )}
-            {results.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {results.map((p) => (
-                  <GameCard key={p.game.id} page={p} />
-                ))}
-              </div>
-            ) : (
-              !q && <p className="card p-6 text-center text-muted">No games published yet. Check back soon!</p>
-            )}
-            {/* Any search also checks the other guide sites, so this is one place to look. */}
-            {q.trim() && <GuidesElsewhere query={q.trim()} foundHere={results.length > 0} />}
-          </>
-        )}
-      </LoadState>
+      {!q.trim() ? (
+        <p className="font-mono text-sm text-muted">
+          &gt; searches Logan's Balls, Bob's Guide, the Pinball Primer, and Pinball Cards.
+        </p>
+      ) : (
+        <LoadState state={state}>
+          {() => (
+            <>
+              {results.length > 0 && (
+                <>
+                  <p className="font-mono text-xs text-muted">
+                    &gt; {results.length} guide{results.length === 1 ? "" : "s"} on Logan's Balls matching “{q}”
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {results.map((p) => (
+                      <GameCard key={p.game.id} page={p} />
+                    ))}
+                  </div>
+                </>
+              )}
+              <GuidesElsewhere query={q.trim()} foundHere={results.length > 0} />
+            </>
+          )}
+        </LoadState>
+      )}
     </div>
   );
 }

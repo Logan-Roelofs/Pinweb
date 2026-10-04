@@ -7,8 +7,11 @@ import { useLoad, useTitle } from "../../hooks/useLoad";
 
 export default function Home() {
   useTitle(undefined);
-  // Newest edits first.
-  const recent = useLoad(() => getPublishedGamePages().then((pages) => pages.slice(0, 12)), []);
+  // Every guide, A→Z, for scrolling through.
+  const guides = useLoad(
+    () => getPublishedGamePages().then((pages) => pages.sort((a, b) => a.game.nameLower.localeCompare(b.game.nameLower))),
+    [],
+  );
 
   return (
     <div className="space-y-12">
@@ -23,17 +26,26 @@ export default function Home() {
         <p className="mt-4 max-w-prose text-lg leading-relaxed">
           One page per machine: multiball setups, wizard-mode routes, and skill-shot tips, written at the machine.
         </p>
-        <div className="mt-6">
-          <Link to="/games" className="btn btn-primary">
-            Browse all games
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a href="#guides" className="btn btn-primary">
+            Browse the guides ↓
+          </a>
+          <Link to="/search" className="btn">
+            Search
           </Link>
         </div>
         </div>
       </section>
 
-      <section>
-        <h2 className="mb-4 text-2xl font-bold">Recently updated</h2>
-        <LoadState state={recent}>
+      <section id="guides" className="scroll-mt-20">
+        <LoadState state={guides}>
+          {(pages) => (
+            <h2 className="mb-4 text-2xl font-bold">
+              All guides {pages.length > 0 && <span className="font-mono text-sm text-muted">({pages.length})</span>}
+            </h2>
+          )}
+        </LoadState>
+        <LoadState state={guides}>
           {(pages) =>
             pages.length === 0 ? (
               <p className="card p-6 text-center text-muted">No games published yet. Check back soon!</p>

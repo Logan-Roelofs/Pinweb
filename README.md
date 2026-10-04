@@ -221,7 +221,7 @@ Each game page shows an **Elsewhere** row: PinTips, PinVideos, Match Play, YouTu
 
 ## Searching other guide sites
 
-Every search on the Games page also checks three other strategy sites, so it's one place to look for any machine. Your own games show first; the others appear under **Also elsewhere** (or **Guides elsewhere** when the game isn't on this site yet), each opening in a new tab:
+Every search (the 🔍 icon in the top bar, `/search`) also checks three other strategy sites, so it's one place to look for any machine. Your own games show first; the others appear under **Also elsewhere** (or **Guides elsewhere** when the game isn't on this site yet), each opening in a new tab:
 
 - [Bob's Guide to Classic Pinball Machines](https://rules.silverballmania.com/): classic machines only (1989 or earlier; newer ones are empty placeholders there).
 - [The Pinball Primer](https://pinballprimer.github.io/gamelist.html): matched by OPDB game group, so one tutorial covers a game and its special editions.
@@ -251,6 +251,6 @@ Icons are generated from `public/icon.svg`. After editing it, run `npx @vite-pwa
 | `strategies/{gameId}` | gameId, gameName, body (TipTap JSON), excerpt, photos[], status, createdAt, updatedAt, publishedAt | Everyone if `status == "published"`, otherwise admin only |
 | `strategies/{gameId}/notes/{id}` | text, photoIds[], createdAt, updatedAt | Admin only |
 
-Public URLs: `/games` (all published games, with search) and `/games/{gameId}` (a game's strategy page). Admin: `/admin/games/{gameId}` edits the game info and its strategy on one page. `/admin/games/new` opens the same editor empty; the game is saved as soon as it has a name (manufacturer, year, and cover are optional and can be filled in any time).
+Public URLs: `/` (home, with every published guide A–Z), `/search` (search, opened from the 🔍 icon), and `/games/{gameId}` (a game's strategy page; plain `/games` redirects home). Admin: `/admin/games/{gameId}` edits the game info and its strategy on one page. `/admin/games/new` opens the same editor empty; the game is saved as soon as it has a name (manufacturer, year, and cover are optional and can be filled in any time).
 
 Photos are stored in Storage at `games/{gameId}/…` (cover) and `strategies/{gameId}/{photoId}.jpg` (+ `_thumb.jpg`). They're compressed on the device to at most 2000px (under about 1 MB) before uploading.
