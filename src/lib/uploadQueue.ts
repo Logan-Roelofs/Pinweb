@@ -85,9 +85,14 @@ export function startQueue() {
 }
 
 /** Saves the picked photo on the device right away, then processes the queue. */
-export async function enqueuePhoto(file: Blob, target: { gameId: string; noteId?: string }): Promise<string> {
+export async function enqueuePhoto(
+  file: Blob,
+  target: { gameId: string; noteId?: string },
+  /** Use a pre-made photo id (e.g. one already referenced by a photo row). */
+  photoId?: string,
+): Promise<string> {
   const item: QueueItem = {
-    id: newPhotoId(),
+    id: photoId ?? newPhotoId(),
     gameId: target.gameId,
     noteId: target.noteId ?? "",
     createdAt: Date.now(),

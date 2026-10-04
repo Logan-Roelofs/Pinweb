@@ -12,6 +12,7 @@ const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
 const GameList = lazy(() => import("./pages/admin/GameList"));
 const GameEditor = lazy(() => import("./pages/admin/GameEditor"));
 const Capture = lazy(() => import("./pages/admin/Capture"));
+const Import = lazy(() => import("./pages/admin/Import"));
 
 const loading = <p className="p-8 text-center font-mono text-muted">&gt; loading…</p>;
 const page = (el: ReactNode) => <Suspense fallback={loading}>{el}</Suspense>;
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       // "games/new" opens the editor empty (see GameEditor).
       { path: "games/:id", element: page(<GameEditor />) },
       { path: "capture", element: page(<Capture />) },
+      { path: "import", element: page(<Import />) },
     ],
   },
 ]);

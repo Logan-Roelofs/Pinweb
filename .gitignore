@@ -15,6 +15,9 @@ firebase-debug.*.log
 ui-debug.log
 emulator-data/
 
+# Old-site pages and screenshots, used once by Admin → Import (content lives in Firebase after import)
+pinballstrat/
+
 # Never commit service account keys
 *service-account*.json
 *-firebase-adminsdk-*.json

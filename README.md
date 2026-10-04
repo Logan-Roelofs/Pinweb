@@ -207,6 +207,17 @@ In a game's editor, put the cursor where you want photos (e.g. right under an H2
 
 On the public page, a row is a side-scrolling strip; tapping a photo opens it full screen and swipes through that row only. Photos placed in rows aren't repeated in the gallery at the bottom (which becomes "More photos"). **↓ Add to strategy** on a capture note brings the note's photos along as a row.
 
+## Importing the old logansballs.com guides
+
+The old site's pages (`pinballstrat/<game>/page.tsx` plus `pinballstrat/static/` screenshots) can be imported once:
+
+1. On a computer, sign in at `/admin`, open **Games → Import**, and choose the `pinballstrat` folder.
+2. Check the preview (sections, screenshots, maker/year). Games whose name already exists are unticked so nothing is duplicated.
+3. Tap **Import N games as drafts**, and keep the tab open until the **⇪** badge disappears (screenshots are compressed and uploaded in the background).
+4. Review each draft under **Games → Drafts**, add tags, and publish.
+
+How pages convert: section titles → H2, `<h3>` → H3, paragraphs/lists/bold carry over, each screenshot becomes a photo row where it was (back-to-back screenshots share one row), high score and pin-golf target become a line at the top, the Congo route table becomes one list per route, and the Metallica video becomes a YouTube link. To preview a conversion without importing anything: `node scripts/test-import.ts` (or `node scripts/test-import.ts congo` for one game's outline).
+
 ## Install it on your phone
 
 The site is a PWA (progressive web app): it can be added to your home screen and then opens full-screen like an app, even with no signal (the app itself is stored on the phone; content you've already viewed is available offline).
