@@ -24,7 +24,7 @@ export function subscribeStrategy(gameId: string, onChange: (s: Strategy | null)
   return onSnapshot(doc(strategies, gameId), (snap) => onChange(snap.exists() ? fromSnap<Strategy>(snap) : null));
 }
 
-export type StrategyEdits = Partial<Pick<Strategy, "body" | "excerpt" | "tags">>;
+export type StrategyEdits = Partial<Pick<Strategy, "body" | "excerpt">>;
 
 export function updateStrategy(gameId: string, edits: StrategyEdits): Promise<void> {
   return trackWrite(updateDoc(doc(strategies, gameId), { ...edits, updatedAt: serverTimestamp() }), "strategy");

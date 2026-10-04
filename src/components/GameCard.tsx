@@ -1,9 +1,8 @@
 import { Link } from "react-router";
 import type { GamePage } from "../data/public";
 import { timeAgo } from "../lib/format";
-import TagChip from "./TagChip";
 
-/** A game's strategy page as a card: photo, name, maker/year, excerpt, tags. */
+/** A game's strategy page as a card: photo, name, maker/year, excerpt. */
 export default function GameCard({ page: { game, strategy } }: { page: GamePage }) {
   const photo = game.photo ?? strategy.photos[0];
   return (
@@ -36,12 +35,7 @@ export default function GameCard({ page: { game, strategy } }: { page: GamePage 
           </p>
         )}
         {strategy.excerpt && <p className="line-clamp-3 text-sm text-muted">{strategy.excerpt}</p>}
-        <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
-          {strategy.tags.slice(0, 3).map((t) => (
-            <TagChip key={t} tag={t} />
-          ))}
-          <span className="ml-auto font-mono text-xs text-muted">{timeAgo(strategy.updatedAt)}</span>
-        </div>
+        <p className="mt-auto pt-2 text-right font-mono text-xs text-muted">{timeAgo(strategy.updatedAt)}</p>
       </div>
     </article>
   );

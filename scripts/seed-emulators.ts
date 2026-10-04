@@ -45,7 +45,6 @@ const bullets = (...items: string[]) => ({
 const strategies = [
   {
     gameId: "medieval-madness",
-    tags: ["multiball", "beginner"],
     status: "published",
     days: 1,
     body: body(
@@ -56,14 +55,12 @@ const strategies = [
   },
   {
     gameId: "attack-from-mars",
-    tags: ["wizard-mode", "advanced"],
     status: "published",
     days: 5,
     body: body(h2("Rule the Universe"), p("Destroy every saucer and conquer all the cities.")),
   },
   {
     gameId: "godzilla",
-    tags: ["multiball"],
     status: "draft",
     days: 0,
     body: body(p("Rough notes: the building shots light super jackpot?")),

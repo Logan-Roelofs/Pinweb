@@ -20,7 +20,6 @@ export function strategyData(gameId: string, overrides: Record<string, unknown> 
     body: "",
     excerpt: "",
     photos: [],
-    tags: ["multiball"],
     status: "draft",
     createdAt: new Date(),
     updatedAt: new Date(),

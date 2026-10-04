@@ -4,7 +4,6 @@ import Lightbox from "../../components/Lightbox";
 import LoadState from "../../components/LoadState";
 import PhotoGallery from "../../components/PhotoGallery";
 import RichTextView from "../../components/RichTextView";
-import TagChip from "../../components/TagChip";
 import { getVisibleGamePage } from "../../data/public";
 import { useAuth } from "../../hooks/useAuth";
 import { useLoad, useTitle } from "../../hooks/useLoad";
@@ -57,13 +56,6 @@ export default function GameDetail() {
                   <p className="font-mono text-sm tracking-wide text-muted uppercase">
                     {[game.manufacturer, game.year].filter(Boolean).join(" · ")}
                   </p>
-                )}
-                {s.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {s.tags.map((t) => (
-                      <TagChip key={t} tag={t} />
-                    ))}
-                  </div>
                 )}
                 <p className="font-mono text-xs text-muted">Updated {formatDate(s.updatedAt)}</p>
                 {isAdmin && (

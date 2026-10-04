@@ -100,6 +100,13 @@ describe("admin", () => {
     await assertSucceeds(deleteDoc(doc(db, "strategies/new")));
   });
 
+  it("can still edit pages saved with the old (now unused) tags field", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "strategies/old"), strategyData("old", { tags: [] }));
+    });
+    await assertSucceeds(updateDoc(doc(adminDb(), "strategies/old"), { body: "edited" }));
+  });
+
   it("can manage games", async () => {
     const db = adminDb();
     const game = { name: "Attack from Mars", nameLower: "attack from mars", manufacturer: "Bally", year: 1995, photo: null };

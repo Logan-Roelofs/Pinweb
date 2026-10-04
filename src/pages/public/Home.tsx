@@ -2,10 +2,8 @@ import { Link } from "react-router";
 import GameCard from "../../components/GameCard";
 import LoadState from "../../components/LoadState";
 import MatrixRain from "../../components/MatrixRain";
-import TagChip from "../../components/TagChip";
 import { getPublishedGamePages } from "../../data/public";
 import { useLoad, useTitle } from "../../hooks/useLoad";
-import { SUGGESTED_TAGS } from "../../lib/types";
 
 export default function Home() {
   useTitle(undefined);
@@ -29,15 +27,6 @@ export default function Home() {
             Browse all games
           </Link>
         </div>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-3 font-mono text-sm tracking-wide text-muted uppercase">Jump to a tag</h2>
-        <div className="flex flex-wrap gap-2">
-          {SUGGESTED_TAGS.map((t) => (
-            <TagChip key={t} tag={t} />
-          ))}
         </div>
       </section>
 

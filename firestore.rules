@@ -36,6 +36,8 @@ service cloud.firestore {
         && optionalString(d, 'gameName', 100)
         && optionalString(d, 'excerpt', 500)
         && (!('body' in d) || (d.body is string && d.body.size() <= 900000))
+        // 'tags' is no longer used, but pages saved before it was removed still
+        // have the field, so it stays allowed or those pages couldn't be edited.
         && (!('tags' in d) || (d.tags is list && d.tags.size() <= 20))
         && (!('photos' in d) || (d.photos is list && d.photos.size() <= 100));
     }

@@ -55,7 +55,7 @@ export function newGameId(): string {
  */
 export function createGame(
   input: GameInput,
-  options: { id?: string; body?: string; excerpt?: string; tags?: string[] } = {},
+  options: { id?: string; body?: string; excerpt?: string } = {},
 ): string {
   const gameRef = options.id ? doc(games, options.id) : doc(games);
   const data = cleanInput(input);
@@ -67,7 +67,6 @@ export function createGame(
     body: options.body ?? "",
     excerpt: options.excerpt ?? "",
     photos: [],
-    tags: options.tags ?? [],
     status: "draft",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

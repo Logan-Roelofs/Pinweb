@@ -43,7 +43,6 @@ export interface Strategy {
   excerpt: string;
   /** Display order = array order. */
   photos: Photo[];
-  tags: string[];
   status: StrategyStatus;
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
@@ -60,16 +59,4 @@ export interface Note {
   updatedAt: Timestamp | null;
   /** Set once the note has been added into the strategy text. */
   mergedAt?: Timestamp | null;
-}
-
-export const SUGGESTED_TAGS = ["multiball", "wizard-mode", "skill-shot", "beginner", "advanced"];
-
-/** "Wizard Mode!" → "wizard-mode" */
-export function normalizeTag(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 30);
 }

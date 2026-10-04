@@ -16,7 +16,7 @@ const Capture = lazy(() => import("./pages/admin/Capture"));
 const loading = <p className="p-8 text-center font-mono text-muted">&gt; loading…</p>;
 const page = (el: ReactNode) => <Suspense fallback={loading}>{el}</Suspense>;
 
-/** Old /search links → the games page, keeping ?q= and ?tag=. */
+/** Old /search links → the games page, keeping the search text. */
 function SearchRedirect() {
   const { search } = useLocation();
   return <Navigate to={`/games${search}`} replace />;

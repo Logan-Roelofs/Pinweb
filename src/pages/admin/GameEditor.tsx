@@ -8,7 +8,6 @@ import { PhotosContext } from "../../components/editor/PhotosContext";
 import PhotoManager from "../../components/PhotoManager";
 import RichTextEditor from "../../components/RichTextEditor";
 import StatusBadge from "../../components/StatusBadge";
-import TagInput from "../../components/TagInput";
 import { createGame, deleteGame, newGameId, setGamePhoto, subscribeGame, updateGame } from "../../data/games";
 import { setStrategyPhotos, setStrategyStatus, subscribeStrategy, updateStrategy } from "../../data/strategies";
 import { saveStatusLabel, useAutosave, type SaveStatus } from "../../hooks/useAutosave";
@@ -109,8 +108,7 @@ function Editor({
   // Strategy text
   const editorRef = useRef<TiptapEditor | null>(null);
   const [body, setBody] = useState({ json: strategy?.body ?? "", excerpt: strategy?.excerpt ?? "" });
-  const [tags, setTags] = useState(strategy?.tags ?? []);
-  const text = useMemo(() => ({ body: body.json, excerpt: body.excerpt, tags }), [body, tags]);
+  const text = useMemo(() => ({ body: body.json, excerpt: body.excerpt }), [body]);
   const latestText = useRef(text);
   latestText.current = text;
 
@@ -266,11 +264,6 @@ function Editor({
         ) : (
           <p className="text-sm text-muted">Name the game to add photos.</p>
         )}
-      </div>
-
-      <div>
-        <span className="label">Tags</span>
-        <TagInput tags={tags} onChange={setTags} />
       </div>
 
       <section className="card space-y-4 p-4">
