@@ -215,6 +215,10 @@ In a game's editor, **🔍 Find backglass** (under the name, and next to the cov
 
 Newer machines may not be in the database yet. Backglass art belongs to the machine's maker; the images are community-made reproductions.
 
+## Games not on the site: Bob's Guide links
+
+When a search on the Games page finds nothing, it suggests [Bob's Guide to Classic Pinball Machines](https://rules.silverballmania.com/) instead: the name is looked up in the Open Pinball Database (OPDB), and matching classic machines (1989 or earlier, Bob's Guide's era) are listed with direct links to their Bob's Guide pages, opening in a new tab. An **Open Bob's Guide search ↗** link is always there too (their search page can't be pre-filled from a link, so type the name there).
+
 ## Install it on your phone
 
 The site is a PWA (progressive web app): it can be added to your home screen and then opens full-screen like an app, even with no signal (the app itself is stored on the phone; content you've already viewed is available offline).

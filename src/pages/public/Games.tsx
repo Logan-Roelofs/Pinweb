@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router";
+import BobsGuideSuggestions from "../../components/BobsGuideSuggestions";
 import GameCard from "../../components/GameCard";
 import LoadState from "../../components/LoadState";
 import { getPublishedGamePages } from "../../data/public";
@@ -58,7 +59,7 @@ export default function Games() {
             {all.length === 0 ? (
               <p className="card p-6 text-center text-muted">No games published yet. Check back soon!</p>
             ) : results.length === 0 ? (
-              <p className="card p-6 text-center text-muted">Nothing found. Try fewer or different words.</p>
+              <BobsGuideSuggestions query={q} />
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {results.map((p) => (
