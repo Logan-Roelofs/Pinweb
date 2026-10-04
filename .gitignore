@@ -15,7 +15,7 @@ firebase-debug.*.log
 ui-debug.log
 emulator-data/
 
-# Old-site pages and screenshots, used once by Admin → Import (content lives in Firebase after import)
+# Old logansballs.com source files, kept locally only (their content now lives in Firebase)
 pinballstrat/
 
 # Never commit service account keys

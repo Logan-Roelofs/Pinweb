@@ -31,14 +31,9 @@ export default function GameList() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Games</h1>
-        <div className="flex gap-2">
-          <Link to="/admin/import" className="btn btn-sm">
-            Import
-          </Link>
-          <Link to="/admin/games/new" className="btn btn-primary btn-sm">
-            + New game
-          </Link>
-        </div>
+        <Link to="/admin/games/new" className="btn btn-primary btn-sm">
+          + New game
+        </Link>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
