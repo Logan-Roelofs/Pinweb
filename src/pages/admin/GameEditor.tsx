@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 import NotesPanel from "../../components/NotesPanel";
+import BackglassSearch from "../../components/editor/BackglassSearch";
+import { downloadBackglass, type BackglassResult } from "../../lib/backglass";
 import { PhotosContext } from "../../components/editor/PhotosContext";
 import PhotoManager from "../../components/PhotoManager";
 import RichTextEditor from "../../components/RichTextEditor";
@@ -135,6 +137,25 @@ function Editor({
   const status = strategy?.status ?? "draft";
   const published = status === "published";
 
+  // Backglass lookup: the chosen image becomes the cover photo. For a game
+  // that isn't saved yet, it waits until the game has been created.
+  const [lookingUp, setLookingUp] = useState(false);
+  const [incomingCover, setIncomingCover] = useState<File | null>(null);
+
+  async function applyBackglass(result: BackglassResult, { fillDetails }: { fillDetails: boolean }) {
+    setLookingUp(false);
+    if (!name.trim()) setName(result.gameName);
+    if (fillDetails) {
+      if (!manufacturer && result.manufacturer) setManufacturer(result.manufacturer);
+      if (!year && result.year) setYear(String(result.year));
+    }
+    try {
+      setIncomingCover(await downloadBackglass(result));
+    } catch (err) {
+      reportError(`Couldn't get that backglass: ${errorMessage(err)}`, err);
+    }
+  }
+
   async function handleDelete() {
     if (!game || !confirm(`Delete “${game.name}”, its strategy, and all its photos? This can't be undone.`)) return;
     await deleteGame(game, strategy).catch((err) => reportError("Couldn't delete game", err));
@@ -193,7 +214,19 @@ function Editor({
         ) : (
           exists && !name.trim() && <p className="mt-1 text-sm text-draft">A name is required. Changes won't save until it has one.</p>
         )}
+        <button type="button" className="btn btn-sm mt-2" onClick={() => setLookingUp(true)}>
+          🔍 Find backglass
+        </button>
       </div>
+
+      {lookingUp && (
+        <BackglassSearch
+          initialQuery={name}
+          offerDetails={!manufacturer || !year}
+          onConfirm={applyBackglass}
+          onClose={() => setLookingUp(false)}
+        />
+      )}
 
       <div>
         <span className="label">Strategy</span>
@@ -272,7 +305,20 @@ function Editor({
             />
           </div>
         </div>
-        {game ? <CoverPhoto game={game} /> : <p className="text-sm text-muted">Name the game to add a cover photo.</p>}
+        {game ? (
+          <CoverPhoto
+            game={game}
+            incoming={incomingCover}
+            onIncomingHandled={() => setIncomingCover(null)}
+            onFindBackglass={() => setLookingUp(true)}
+          />
+        ) : (
+          <p className="text-sm text-muted">
+            {incomingCover
+              ? "Backglass chosen. It becomes the cover as soon as the game is saved (give it a name)."
+              : "Name the game to add a cover photo, or use 🔍 Find backglass above."}
+          </p>
+        )}
       </section>
 
       {game && (
@@ -297,9 +343,28 @@ function SaveIndicator({ statuses }: { statuses: SaveStatus[] }) {
 }
 
 /** The game's cover photo, shown at the top of its public page and on cards. */
-function CoverPhoto({ game }: { game: Game }) {
+function CoverPhoto({
+  game,
+  incoming,
+  onIncomingHandled,
+  onFindBackglass,
+}: {
+  game: Game;
+  /** A confirmed backglass waiting to become the cover. */
+  incoming: File | null;
+  onIncomingHandled: () => void;
+  onFindBackglass: () => void;
+}) {
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
+
+  // Upload a confirmed backglass (once, even if React runs the effect twice).
+  const handled = useRef<File | null>(null);
+  useEffect(() => {
+    if (!incoming || handled.current === incoming) return;
+    handled.current = incoming;
+    change(incoming).finally(onIncomingHandled);
+  });
 
   async function change(file: File) {
     setProgress(0);
@@ -336,6 +401,9 @@ function CoverPhoto({ game }: { game: Game }) {
         <div className="flex flex-col gap-2">
           <button type="button" className="btn btn-sm" onClick={() => input.current?.click()} disabled={progress !== null}>
             {progress !== null ? `Uploading ${Math.round(progress * 100)}%` : game.photo ? "Replace" : "Add cover"}
+          </button>
+          <button type="button" className="btn btn-sm" onClick={onFindBackglass} disabled={progress !== null}>
+            🔍 Find backglass
           </button>
           {game.photo && (
             <button type="button" className="btn btn-sm btn-danger" onClick={remove}>

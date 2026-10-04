@@ -207,6 +207,12 @@ In a game's editor, put the cursor where you want photos (e.g. right under an H2
 
 On the public page, a row is a side-scrolling strip; tapping a photo opens it full screen and swipes through that row only. Photos placed in rows aren't repeated in the gallery at the bottom (which becomes "More photos"). **↓ Add to strategy** on a capture note brings the note's photos along as a row.
 
+## Backglass lookup (cover photos)
+
+In a game's editor, **🔍 Find backglass** (under the name, and next to the cover photo) searches the [Virtual Pinball Spreadsheet](https://virtualpinballspreadsheet.github.io), a community database of pinball machines with backglass images. Tap a result to preview it; nothing is saved until **Use as cover**. The image is copied into your own Firebase Storage (compressed like other photos), so the page doesn't depend on the other site. If the game has no manufacturer/year yet, you can fill them from the match, and on a brand-new game an empty name is filled in too, so looking a game up is a quick way to add it.
+
+Newer machines may not be in the database yet. Backglass art belongs to the machine's maker; the images are community-made reproductions.
+
 ## Install it on your phone
 
 The site is a PWA (progressive web app): it can be added to your home screen and then opens full-screen like an app, even with no signal (the app itself is stored on the phone; content you've already viewed is available offline).
