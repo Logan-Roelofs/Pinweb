@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Faint falling-code background ("digital rain"). Decorative only: it sits
- * behind content at low opacity, never behind body text, and is static
- * (one drawn frame) on phones, with "reduce motion" on, or in a hidden tab.
+ * Faint falling-code background ("digital rain") of digits and letters.
+ * Decorative only: it sits behind content at low opacity. To save battery it
+ * pauses while scrolled out of view or while the app is in the background,
+ * and it's a still frame when the device asks for reduced motion.
  */
 export default function MatrixRain({ className = "" }: { className?: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -13,11 +14,12 @@ export default function MatrixRain({ className = "" }: { className?: string }) {
     const ctx = el?.getContext("2d");
     if (!el || !ctx) return;
 
-    const glyphs = "01アイウエオカキクケコサシスセソ<>=+*#".split("");
+    const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     const size = 16;
     let columns: number[] = [];
     let raf = 0;
     let last = 0;
+    let onScreen = true;
 
     const resize = () => {
       const { width, height } = el.getBoundingClientRect();
@@ -26,14 +28,14 @@ export default function MatrixRain({ className = "" }: { className?: string }) {
       el.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       columns = Array.from({ length: Math.ceil(width / size) }, () => Math.random() * -(height / size));
+      // Run it ahead so the rain is already falling when it first appears.
+      for (let i = 0; i < Math.ceil(height / size) + 10; i++) step();
     };
 
-    const step = (fade: boolean) => {
+    const step = () => {
       const { width, height } = el.getBoundingClientRect();
-      if (fade) {
-        ctx.fillStyle = "rgba(5, 8, 6, 0.12)";
-        ctx.fillRect(0, 0, width, height);
-      }
+      ctx.fillStyle = "rgba(5, 8, 6, 0.12)";
+      ctx.fillRect(0, 0, width, height);
       ctx.font = `${size}px "JetBrains Mono", monospace`;
       columns.forEach((y, i) => {
         const char = glyphs[Math.floor(Math.random() * glyphs.length)];
@@ -45,23 +47,25 @@ export default function MatrixRain({ className = "" }: { className?: string }) {
 
     const animate = (t: number) => {
       raf = requestAnimationFrame(animate);
-      if (document.hidden || t - last < 70) return;
+      if (document.hidden || !onScreen || t - last < 70) return;
       last = t;
-      step(true);
+      step();
     };
 
     resize();
-    const still =
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(pointer: coarse)").matches;
-    if (still) {
-      // One static frame: draw a screen's worth of trails without animating.
-      for (let i = 0; i < 60; i++) step(true);
+    const observer = new IntersectionObserver(([entry]) => (onScreen = entry.isIntersecting));
+    observer.observe(el);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // One still frame: draw a screen's worth of trails without animating.
+      for (let i = 0; i < 60; i++) step();
     } else {
       raf = requestAnimationFrame(animate);
     }
     window.addEventListener("resize", resize);
     return () => {
       cancelAnimationFrame(raf);
+      observer.disconnect();
       window.removeEventListener("resize", resize);
     };
   }, []);

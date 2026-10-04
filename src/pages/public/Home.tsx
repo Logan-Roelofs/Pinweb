@@ -12,10 +12,11 @@ export default function Home() {
 
   return (
     <div className="space-y-12">
-      <section className="card relative overflow-hidden p-6 shadow-glow sm:p-10">
-        {/* Rain fades out toward the left so it never sits behind the text; on
-            narrow screens the text fills the width, so it's left out there. */}
-        <MatrixRain className="hidden opacity-40 [mask-image:linear-gradient(to_left,black_5%,transparent_45%)] sm:block" />
+      <section className="card relative overflow-hidden p-6 pt-24 shadow-glow sm:p-10">
+        {/* The rain fades out before reaching the text: on phones it fills the
+            top of the banner (hence the extra top padding); on wider screens
+            it runs down the right side. */}
+        <MatrixRain className="opacity-50 [mask-image:linear-gradient(to_bottom,black_0%,black_12%,transparent_38%)] sm:[mask-image:linear-gradient(to_left,black_5%,transparent_45%)]" />
         <div className="relative">
         <p className="font-mono text-sm text-muted">&gt; booting pinweb...</p>
         <h1 className="mt-3 text-3xl font-bold text-glow sm:text-5xl">Pinball strategy, decoded.</h1>
