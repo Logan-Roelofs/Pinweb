@@ -14,6 +14,7 @@ interface VpsGame {
   name: string;
   manufacturer?: string;
   year?: number;
+  ipdbUrl?: string;
   b2sFiles?: { imgUrl?: string; authors?: string[] }[];
 }
 
@@ -47,6 +48,22 @@ const norm = (s: string) =>
     .toLowerCase()
     .normalize("NFKD")
     .replace(/[^a-z0-9]/g, "");
+
+/**
+ * The machine's IPDB (Internet Pinball Database) number, from the same
+ * database, matched on name and year (and maker when several share both).
+ * Null when it isn't listed.
+ */
+export async function findIpdbId(machine: { name: string; manufacturer: string | null; year: number | null }) {
+  const games = await loadDb();
+  const n = norm(machine.name);
+  const candidates = games.filter((g) => norm(g.name) === n && (!machine.year || g.year === machine.year));
+  const best =
+    candidates.find((g) => machine.manufacturer && norm(g.manufacturer ?? "") === norm(machine.manufacturer)) ??
+    (candidates.length === 1 ? candidates[0] : undefined);
+  const id = best?.ipdbUrl?.match(/[?&]g?id=(\d+)/)?.[1];
+  return id ? Number(id) : null;
+}
 
 /**
  * Backglass images for games matching `query` (e.g. "medieval madness",

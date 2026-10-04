@@ -19,11 +19,21 @@ service cloud.firestore {
     }
 
     function validGame(d) {
-      return d.keys().hasOnly(['name', 'nameLower', 'manufacturer', 'year', 'photo', 'createdAt', 'updatedAt'])
+      return d.keys().hasOnly(['name', 'nameLower', 'manufacturer', 'year', 'photo', 'machine', 'createdAt', 'updatedAt'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 100
         && optionalString(d, 'manufacturer', 100)
         && (!('year' in d) || d.year == null || (d.year is int && d.year >= 1930 && d.year <= 2100))
-        && (!('photo' in d) || d.photo == null || d.photo is map);
+        && (!('photo' in d) || d.photo == null || d.photo is map)
+        && (!('machine' in d) || d.machine == null || validMachine(d.machine));
+    }
+
+    // Which real machine a game is (for links to other pinball sites).
+    function validMachine(m) {
+      return m is map
+        && m.keys().hasOnly(['opdbId', 'ipdbId', 'name'])
+        && m.opdbId is string && m.opdbId.matches('^[A-Za-z0-9-]{5,40}$')
+        && (m.ipdbId == null || (m.ipdbId is int && m.ipdbId > 0))
+        && m.name is string && m.name.size() <= 100;
     }
 
     function validStrategy(d, strategyId) {

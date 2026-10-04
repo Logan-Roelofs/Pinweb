@@ -215,6 +215,10 @@ In a game's editor, **🔍 Find backglass** (under the name, and next to the cov
 
 Newer machines may not be in the database yet. Backglass art belongs to the machine's maker; the images are community-made reproductions.
 
+## Links to other pinball sites
+
+Each game page shows an **Elsewhere** row: PinTips, PinVideos, Match Play, YouTube, OPDB, IPDB, and the flyer archive, all opening in new tabs. Most of these need to know exactly which machine the page is about, so in the game editor's Details section use **🔗 Link machine**: it searches the Open Pinball Database by name, you pick the exact maker and year (e.g. the 1997 Williams original rather than a remake), and the IPDB number is filled in automatically when it can be found. Until a game is linked, only the YouTube search link shows.
+
 ## Games not on the site: Bob's Guide links
 
 When a search on the Games page finds nothing, it suggests [Bob's Guide to Classic Pinball Machines](https://rules.silverballmania.com/) instead: the name is looked up in the Open Pinball Database (OPDB), and matching classic machines (1989 or earlier, Bob's Guide's era) are listed with direct links to their Bob's Guide pages, opening in a new tab. An **Open Bob's Guide search ↗** link is always there too (their search page can't be pre-filled from a link, so type the name there).
@@ -237,7 +241,7 @@ Icons are generated from `public/icon.svg`. After editing it, run `npx @vite-pwa
 
 | Collection | Fields | Who can read |
 |---|---|---|
-| `games/{gameId}` | name, nameLower, manufacturer, year, photo (cover), createdAt, updatedAt | Everyone |
+| `games/{gameId}` | name, nameLower, manufacturer, year, photo (cover), machine ({opdbId, ipdbId, name}, optional), createdAt, updatedAt | Everyone |
 | `strategies/{gameId}` | gameId, gameName, body (TipTap JSON), excerpt, photos[], status, createdAt, updatedAt, publishedAt | Everyone if `status == "published"`, otherwise admin only |
 | `strategies/{gameId}/notes/{id}` | text, photoIds[], createdAt, updatedAt | Admin only |
 

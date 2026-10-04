@@ -3,12 +3,14 @@ import { Link, useLocation, useNavigate, useParams } from "react-router";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 import NotesPanel from "../../components/NotesPanel";
 import BackglassSearch from "../../components/editor/BackglassSearch";
+import MachineLookup from "../../components/editor/MachineLookup";
+import type { OpdbMachine } from "../../lib/opdb";
 import { downloadBackglass, type BackglassResult } from "../../lib/backglass";
 import { PhotosContext } from "../../components/editor/PhotosContext";
 import PhotoManager from "../../components/PhotoManager";
 import RichTextEditor from "../../components/RichTextEditor";
 import StatusBadge from "../../components/StatusBadge";
-import { createGame, deleteGame, newGameId, setGamePhoto, subscribeGame, updateGame } from "../../data/games";
+import { createGame, deleteGame, newGameId, setGameMachine, setGamePhoto, subscribeGame, updateGame } from "../../data/games";
 import { setStrategyPhotos, setStrategyStatus, subscribeStrategy, updateStrategy } from "../../data/strategies";
 import { saveStatusLabel, useAutosave, type SaveStatus } from "../../hooks/useAutosave";
 import { useGames } from "../../hooks/useLive";
@@ -312,6 +314,15 @@ function Editor({
               : "Name the game to add a cover photo, or use 🔍 Find backglass above."}
           </p>
         )}
+        {game && (
+          <MachineSection
+            game={game}
+            onFillDetails={(m) => {
+              if (!manufacturer && m.manufacturer) setManufacturer(m.manufacturer);
+              if (!year && m.year) setYear(String(m.year));
+            }}
+          />
+        )}
       </section>
 
       {game && (
@@ -320,6 +331,59 @@ function Editor({
             Delete game
           </button>
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Links the game to the real machine (OPDB, plus its IPDB number), so its
+ * public page can link to PinTips, Pinball Videos, Match Play, IPDB, etc.
+ */
+function MachineSection({ game, onFillDetails }: { game: Game; onFillDetails: (m: OpdbMachine) => void }) {
+  const [open, setOpen] = useState(false);
+  const m = game.machine;
+
+  return (
+    <div>
+      <span className="label">Machine (for links to other sites)</span>
+      {m ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="min-w-0 flex-1 text-sm">
+            <div className="font-semibold">{m.name}</div>
+            <div className="font-mono text-xs text-muted">
+              OPDB {m.opdbId} · {m.ipdbId ? `IPDB ${m.ipdbId}` : "no IPDB number found"}
+            </div>
+          </div>
+          <button type="button" className="btn btn-sm" onClick={() => setOpen(true)}>
+            Change
+          </button>
+          <button
+            type="button"
+            className="btn btn-sm btn-danger"
+            onClick={() => confirm("Remove the machine link? The page's PinTips/IPDB/etc. links will disappear.") && setGameMachine(game.id, null)}
+          >
+            Unlink
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="flex-1 text-sm text-muted">Not linked yet. Linking adds PinTips, IPDB, flyer, and other links to the page.</p>
+          <button type="button" className="btn btn-sm" onClick={() => setOpen(true)}>
+            🔗 Link machine
+          </button>
+        </div>
+      )}
+      {open && (
+        <MachineLookup
+          initialQuery={game.name}
+          onClose={() => setOpen(false)}
+          onPick={(machine, details) => {
+            setOpen(false);
+            setGameMachine(game.id, machine);
+            onFillDetails(details);
+          }}
+        />
       )}
     </div>
   );

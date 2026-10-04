@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/db";
 import { deletePhotoFiles } from "../lib/photos";
-import type { Game, Photo, Strategy } from "../lib/types";
+import type { Game, MachineLink, Photo, Strategy } from "../lib/types";
 import { trackWrite } from "../lib/writes";
 import { fromSnap } from "./convert";
 
@@ -83,6 +83,11 @@ export function updateGame(id: string, input: GameInput): Promise<void> {
   batch.update(doc(games, id), { ...data, updatedAt: serverTimestamp() });
   batch.update(doc(db, "strategies", id), { gameName: data.name });
   return trackWrite(batch.commit(), "game info");
+}
+
+/** Links the game to a real machine (OPDB/IPDB ids), or unlinks it with null. */
+export function setGameMachine(id: string, machine: MachineLink | null): Promise<void> {
+  return trackWrite(updateDoc(doc(games, id), { machine, updatedAt: serverTimestamp() }), "machine link");
 }
 
 export function setGamePhoto(id: string, photo: Photo | null): Promise<void> {

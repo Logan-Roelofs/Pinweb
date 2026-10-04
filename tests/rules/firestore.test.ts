@@ -139,6 +139,16 @@ describe("validation (even for admin)", () => {
     await assertFails(setDoc(doc(adminDb(), "strategies/bad"), strategyData("bad", { isAdmin: true })));
   });
 
+  it("accepts a well-formed machine link and rejects junk", async () => {
+    const db = adminDb();
+    const game = { name: "Eight Ball Deluxe", nameLower: "eight ball deluxe" };
+    await assertSucceeds(setDoc(doc(db, "games/ebd"), { ...game, machine: { opdbId: "G5KXk-MLB9V", ipdbId: 762, name: "Eight Ball Deluxe" } }));
+    await assertSucceeds(setDoc(doc(db, "games/ebd"), { ...game, machine: { opdbId: "G5KXk-MLB9V", ipdbId: null, name: "Eight Ball Deluxe" } }));
+    await assertSucceeds(setDoc(doc(db, "games/ebd"), { ...game, machine: null }));
+    await assertFails(setDoc(doc(db, "games/ebd"), { ...game, machine: { opdbId: "<script>", ipdbId: 1, name: "x" } }));
+    await assertFails(setDoc(doc(db, "games/ebd"), { ...game, machine: { opdbId: "G5KXk-MLB9V", ipdbId: 762, name: "x", extra: 1 } }));
+  });
+
   it("rejects games with no name or a silly year", async () => {
     const db = adminDb();
     await assertFails(setDoc(doc(db, "games/bad"), { name: "", nameLower: "" }));

@@ -22,8 +22,19 @@ export interface Game {
   manufacturer: string | null;
   year: number | null;
   photo: Photo | null;
+  /** Which real machine this is, for links to other pinball sites. */
+  machine?: MachineLink | null;
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
+}
+
+export interface MachineLink {
+  /** Open Pinball Database id, e.g. "G5KXk-MLB9V". */
+  opdbId: string;
+  /** Internet Pinball Database number, e.g. 762 (null if unknown). */
+  ipdbId: number | null;
+  /** The machine's official name, e.g. "Eight Ball Deluxe". */
+  name: string;
 }
 
 /**

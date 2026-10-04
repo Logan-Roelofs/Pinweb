@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import Lightbox from "../../components/Lightbox";
 import LoadState from "../../components/LoadState";
 import PhotoGallery from "../../components/PhotoGallery";
+import ResourceLinks from "../../components/ResourceLinks";
 import RichTextView from "../../components/RichTextView";
 import { getVisibleGamePage } from "../../data/public";
 import { useAuth } from "../../hooks/useAuth";
@@ -58,6 +59,7 @@ export default function GameDetail() {
                   </p>
                 )}
                 <p className="font-mono text-xs text-muted">Updated {formatDate(s.updatedAt)}</p>
+                <ResourceLinks game={game} />
                 {isAdmin && (
                   <Link to={`/admin/games/${game.id}`} className="btn btn-sm">
                     ✎ Edit
