@@ -27,6 +27,6 @@ export function useLoad<T>(load: () => Promise<T>, deps: DependencyList): Load<T
 /** Sets the browser tab title. */
 export function useTitle(title: string | undefined) {
   useEffect(() => {
-    document.title = title ? `${title} · Pinweb` : "Pinweb · Pinball strategy";
+    document.title = title ? `${title} · Logan's Balls` : "Logan's Balls · Pinball strategy";
   }, [title]);
 }

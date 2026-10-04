@@ -13,8 +13,8 @@ export default defineConfig({
       registerType: "prompt",
       includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "icon.svg"],
       manifest: {
-        name: "Pinweb · Pinball strategy",
-        short_name: "Pinweb",
+        name: "Logan's Balls · Pinball strategy",
+        short_name: "Logan's Balls",
         description: "Pinball strategies, tips, and wizard-mode guides.",
         theme_color: "#050806",
         background_color: "#050806",

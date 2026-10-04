@@ -29,7 +29,7 @@ export default function Login() {
       <form onSubmit={submit} className="card relative w-full max-w-sm space-y-4 p-6 shadow-glow">
         <div>
           <p className="font-mono text-xs text-muted">&gt; authenticate</p>
-          <h1 className="mt-1 text-2xl font-bold text-glow">PINWEB/admin</h1>
+          <h1 className="mt-1 text-2xl font-bold text-glow">LOGAN'S BALLS<span className="text-muted">/admin</span></h1>
         </div>
         <div>
           <label className="label" htmlFor="email">

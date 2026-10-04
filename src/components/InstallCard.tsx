@@ -30,7 +30,7 @@ export default function InstallCard() {
     <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
       <img src="/pwa-64x64.png" alt="" className="size-12 rounded-xl border border-line" />
       <div className="flex-1 text-sm">
-        <p className="font-mono text-matrix">Install Pinweb on this device</p>
+        <p className="font-mono text-matrix">Install Logan's Balls on this device</p>
         {ios ? (
           <p className="mt-1 text-muted">
             In Safari, tap <strong className="text-text">Share</strong> (the square with an arrow), then{" "}

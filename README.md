@@ -1,4 +1,6 @@
-# Pinweb
+# Logan's Balls
+
+(The code and repo are still called "pinweb"; that's only an internal name.)
 
 A pinball strategy site with a dark, subtle "Matrix" look. Public visitors read published strategies. The admin (one person) writes them, including from a phone while standing at the machine.
 

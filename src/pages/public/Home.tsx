@@ -18,7 +18,7 @@ export default function Home() {
             it runs down the right side. */}
         <MatrixRain className="opacity-50 [mask-image:linear-gradient(to_bottom,black_0%,black_12%,transparent_38%)] sm:[mask-image:linear-gradient(to_left,black_5%,transparent_45%)]" />
         <div className="relative">
-        <p className="font-mono text-sm text-muted">&gt; booting pinweb...</p>
+        <p className="font-mono text-sm text-muted">&gt; booting logans_balls...</p>
         <h1 className="mt-3 text-3xl font-bold text-glow sm:text-5xl">Pinball strategy, decoded.</h1>
         <p className="mt-4 max-w-prose text-lg leading-relaxed">
           One page per machine: multiball setups, wizard-mode routes, and skill-shot tips, written at the machine.

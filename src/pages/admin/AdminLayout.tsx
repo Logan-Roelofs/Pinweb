@@ -55,7 +55,7 @@ export default function AdminLayout() {
       <header className="safe-top sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
         <div className="mx-auto grid max-w-5xl grid-cols-[1fr_auto] items-center gap-x-2 gap-y-1 px-4 py-2 sm:grid-cols-[auto_1fr_auto]">
           <Link to="/admin" className="mr-2 font-mono font-bold text-matrix no-underline text-glow hover:no-underline">
-            PINWEB<span className="text-muted">/admin</span>
+            LOGAN'S BALLS<span className="text-muted">/admin</span>
           </Link>
           <nav className="order-last col-span-2 flex gap-1 sm:order-none sm:col-span-1">
             <NavLink to="/admin" end className={tab}>

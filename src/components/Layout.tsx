@@ -21,7 +21,7 @@ export default function Layout() {
       <header className="safe-top sticky top-0 z-30 border-b border-line bg-bg/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-2">
           <Link to="/" className="font-mono text-xl font-bold text-matrix no-underline text-glow hover:no-underline">
-            PINWEB<span className="cursor-blink">▌</span>
+            LOGAN'S BALLS<span className="cursor-blink">▌</span>
           </Link>
           <nav className="flex items-center gap-1">
             <NavLink to="/games" className={tab}>
