@@ -24,7 +24,7 @@ export default function Home() {
         <p className="font-mono text-sm text-muted">&gt; booting logans_balls...</p>
         <h1 className="mt-3 text-3xl font-bold text-glow sm:text-5xl">Pinball strategy, decoded.</h1>
         <p className="mt-4 max-w-prose text-lg leading-relaxed">
-          One page per machine: multiball setups, wizard-mode routes, and skill-shot tips, written at the machine.
+          
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a href="#guides" className="btn btn-primary">
