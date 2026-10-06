@@ -10,6 +10,10 @@ import "./lib/install";
 import { router } from "./routes";
 import { AuthProvider } from "./hooks/useAuth";
 import UpdatePrompt from "./components/UpdatePrompt";
+import { moveToSiteDomain } from "./lib/canonicalDomain";
+
+// Visitors on Firebase's default address are sent to logansballs.com.
+moveToSiteDomain();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

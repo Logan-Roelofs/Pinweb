@@ -33,7 +33,10 @@ export default defineConfig({
         // The app shell (HTML, JS, CSS, fonts, icons) is cached so the app opens offline.
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
         navigateFallback: "/index.html",
-        // Firebase's own auth pages must always come from the network.
+        // Only the site's real pages open the app offline (same list as the
+        // hosting rewrites in firebase.json); other addresses go to the
+        // network and get a real 404. Firebase's own /__/ auth pages too.
+        navigateFallbackAllowlist: [/^\/$/, /^\/search$/, /^\/games(\/|$)/, /^\/admin(\/|$)/],
         navigateFallbackDenylist: [/^\/__\//],
         runtimeCaching: [
           {

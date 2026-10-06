@@ -148,7 +148,9 @@ Every push to `main` runs [.github/workflows/deploy.yml](.github/workflows/deplo
 
 You can follow each run in the repo's **Actions** tab, and also start one by hand there (**Deploy → Run workflow**).
 
-The site is served at `https://<project-id>.web.app` (and `https://<project-id>.firebaseapp.com`).
+The site lives at **https://logansballs.com** (a custom domain connected in Firebase Hosting). Firebase also serves it at `https://<project-id>.web.app` and `https://<project-id>.firebaseapp.com`; visitors there are forwarded to logansballs.com ([src/lib/canonicalDomain.ts](src/lib/canonicalDomain.ts)), except while that address still has photos or notes waiting to sync on the device, which finish first.
+
+Only real pages (`/`, `/search`, `/games/…`, `/admin/…`) load the app; any other address gets a real **404** status with a themed page ([public/404.html](public/404.html)). The page list is in two places that must match: the `rewrites` in `firebase.json` and `navigateFallbackAllowlist` in `vite.config.ts` (so the offline app doesn't hide 404s).
 
 **If a deploy fails with a permission error**, the service account is usually missing a role. Re-check step 5. For a "Cloud Storage for Firebase API not enabled" error, make sure you clicked **Get started** under Storage.
 
