@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "firebase/auth";
 import { ADMIN_UID } from "../lib/admin";
+import { updateAnalytics } from "../lib/analytics";
 
 interface AuthState {
   /** Undefined until Firebase has restored any saved session. */
@@ -29,6 +30,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unsubscribe();
     };
   }, []);
+
+  // Once sign-in is known: count visitors in Google Analytics, but not the admin.
+  useEffect(() => {
+    if (user !== undefined) updateAnalytics(user?.uid === ADMIN_UID);
+  }, [user]);
 
   const value: AuthState = {
     user,

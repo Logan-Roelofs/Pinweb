@@ -217,6 +217,19 @@ In a game's editor, **🔍 Find backglass** (under the name, and next to the cov
 
 Newer machines may not be in the database yet. Backglass art belongs to the machine's maker; the images are community-made reproductions.
 
+## Google Analytics
+
+Visitor stats through Firebase's built-in Google Analytics (GA4). It's off until a measurement ID is set. Once on, it records page views (including moving between pages in the app), clicks on links to other sites, and what people type into Search (as GA4 "search" events). Your own visits aren't counted while you're signed in as admin, and it never runs on localhost or the emulators. It loads after the page appears, so it doesn't slow the site down.
+
+**Turn it on (one time):**
+1. Firebase console → gear icon → **Project settings** → **Integrations** tab → **Google Analytics** → **Enable**. Create a new Google Analytics account (or pick an existing one) and finish the steps.
+2. Still in Project settings, open the **General** tab, scroll to **Your apps** → your web app. The config now includes `measurementId: "G-XXXXXXXXXX"`; copy that value.
+3. GitHub repo → **Settings → Secrets and variables → Actions → Variables** → **New repository variable**: name `VITE_FIREBASE_MEASUREMENT_ID`, value `G-XXXXXXXXXX`. (Also add it to your local `.env` if you want it there; local runs on localhost don't send data anyway.)
+4. Re-deploy: push any change, or **Actions → Deploy → Run workflow**.
+5. Check it's working: Firebase console → **Analytics → Dashboard**, or in Google Analytics → **Reports → Realtime**, then open logansballs.com in a private/incognito window (signed out). Visits show up in Realtime within a minute; the regular reports fill in over about a day.
+
+**Where to look:** searches are under **Reports → Engagement → Events → search** (add the `search_term` dimension), and clicks to Bob's Guide, PinTips, etc. under the **click** event (`link_url`).
+
 ## Links to other pinball sites
 
 Each game page shows an **Elsewhere** row: PinTips, PinVideos, Match Play, YouTube, OPDB, IPDB, and the flyer archive, all opening in new tabs. Most of these need to know exactly which machine the page is about, so in the game editor's Details section use **🔗 Link machine**: it searches the Open Pinball Database by name, you pick the exact maker and year (e.g. the 1997 Williams original rather than a remake), and the IPDB number is filled in automatically when it can be found. Until a game is linked, only the YouTube search link shows.

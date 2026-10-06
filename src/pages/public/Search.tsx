@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { logSearch } from "../../lib/analytics";
 import { useSearchParams } from "react-router";
 import GuidesElsewhere from "../../components/GuidesElsewhere";
 import GameCard from "../../components/GameCard";
@@ -26,6 +27,12 @@ export default function Search() {
     else next.delete("q");
     setParams(next, { replace: true });
   };
+
+  // Record what people search for (once they've stopped typing).
+  useEffect(() => {
+    const timer = window.setTimeout(() => logSearch(q), 1500);
+    return () => window.clearTimeout(timer);
+  }, [q]);
 
   const all = useMemo(() => (state.status === "ready" ? state.data : []), [state]);
   const results = useMemo(() => {
