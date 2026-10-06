@@ -42,6 +42,8 @@ export const router = createBrowserRouter([
       // "games/new" opens the editor empty (see GameEditor).
       { path: "games/:id", element: page(<GameEditor />) },
       { path: "capture", element: page(<Capture />) },
+      // The same pinball guide search as the public site, inside the admin layout.
+      { path: "search", element: <Search /> },
     ],
   },
 ]);

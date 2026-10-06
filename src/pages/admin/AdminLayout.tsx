@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import { useQueueState } from "../../hooks/useUploadQueue";
 import Toasts from "../../components/Toasts";
+import SearchIconLink from "../../components/SearchIconLink";
 import { saveNote } from "../../data/notes";
 import { allBackups, clearBackup } from "../../lib/noteBackup";
 import { kick, startQueue } from "../../lib/uploadQueue";
@@ -71,7 +72,8 @@ export default function AdminLayout() {
               Site ↗
             </NavLink>
           </nav>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <SearchIconLink to="/admin/search" />
             {waiting > 0 && (
               <button
                 className="btn btn-sm border-draft/50 text-draft"
