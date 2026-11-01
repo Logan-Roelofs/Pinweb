@@ -1,5 +1,8 @@
 node_modules/
 dist/
+
+# The machine list, downloaded before each build (scripts/fetch-machines.ts)
+public/machines.json
 *.local
 
 # Env files hold project config; only the example is committed

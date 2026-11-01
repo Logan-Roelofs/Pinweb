@@ -3,6 +3,9 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # Daily, shortly after the OPDB export updates (06:30 UTC), to refresh the machine list.
+  schedule:
+    - cron: "0 8 * * *"
   workflow_dispatch: {}
 
 # Never run two deploys at once; a newer push waits for the current one.

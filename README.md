@@ -238,11 +238,13 @@ Each game page shows an **Elsewhere** row: PinTips, PinVideos, Match Play, YouTu
 
 Every search (the 🔍 icon in the top bar, `/search`) also checks three other strategy sites, so it's one place to look for any machine. Your own games show first; the others appear under **Also elsewhere** (or **Guides elsewhere** when the game isn't on this site yet), each opening in a new tab:
 
-- [Bob's Guide to Classic Pinball Machines](https://rules.silverballmania.com/): classic machines only (1989 or earlier; newer ones are empty placeholders there).
-- [The Pinball Primer](https://pinballprimer.github.io/gamelist.html): matched by OPDB game group, so one tutorial covers a game and its special editions.
-- [JLP's Pinball Cards](https://pinballcards.net/): matched by name and year (remakes match their own year, e.g. the 2017 Attack from Mars remake).
+- [Bob's Guide to Classic Pinball Machines](https://rules.silverballmania.com/): mostly classic machines.
+- [The Pinball Primer](https://pinballprimer.github.io/gamelist.html): one tutorial covers a game and its special editions.
+- [JLP's Pinball Cards](https://pinballcards.net/): remakes have their own cards, e.g. the 2017 Attack from Mars remake.
 
-How: the typed name is looked up in the Open Pinball Database (OPDB), then checked against each site (Pinball Primer's game list and Pinball Cards' sitemap are downloaded once per visit). "Browse them yourself" links to each site are always shown too.
+How: the typed name is looked up in a list of machines from the Open Pinball Database (OPDB), and each machine's entry says which of these sites have a page for it. "Browse them yourself" links to each site are always shown too.
+
+**The machine list:** OPDB has no search a web page can call, so [scripts/fetch-machines.ts](scripts/fetch-machines.ts) downloads its [daily export](https://docs.matchplay.events/data-exports) to `public/machines.json` before each build and `npm run dev` (it isn't committed). The Deploy workflow runs every day at 08:00 UTC to pick up new machines. The game editor's **🔗 Link machine** search uses the same list. If the download fails during a deploy, the deploy stops and the live site keeps its last list. GitHub turns off scheduled runs after 60 days with no repository activity; it emails you first, and **Actions → Deploy → Enable workflow** turns them back on.
 
 ## Install it on your phone
 

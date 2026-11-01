@@ -34,7 +34,7 @@ export function resourceLinks(gameName: string, machine: MachineLink | null | un
     { label: "PinVideos", url: `https://pinballvideos.com/m/?q=${id}` },
     { label: "Match Play", url: `https://next.matchplay.events/pintips/${id}` },
     youtube,
-    { label: "OPDB", url: `https://opdb.org/search?q=${id}` },
+    { label: "OPDB", url: `https://opdb.org/entries/${id}` },
     ...(machine.ipdbId ? [{ label: "IPDB", url: `https://www.ipdb.org/machine.cgi?id=${machine.ipdbId}` }] : []),
     { label: "Flyer", url: `https://nypinball.com/flyers/${slug(name)}` },
   ];
